@@ -28,6 +28,15 @@
       ],
       "@/db": [
         "./src/db.ts"
+      ],
+      "@/db/db-helpers": [
+        "./src/lib/db/db-helpers.ts"
+      ],
+      "@/db/db-validators": [
+        "./src/lib/db/db-validators.ts"
+      ],
+      "@/prisma": [
+        "./src/lib/prisma.ts"
       ]
     }
   },
