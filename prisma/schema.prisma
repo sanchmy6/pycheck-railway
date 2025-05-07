@@ -20,3 +20,26 @@ model Example {
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 }
+
+model Category {
+  id         Int       @id @default(autoincrement())
+  name       String    @unique
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  problems   Problem[] // One category has many products
+}
+
+model Problem {
+  id               Int      @id @default(autoincrement())
+  name             String   @unique
+  description      String
+  code_snippet     String
+  correct_line     Int
+  correct_reason   String
+  incorrect_reason String
+  hint             String
+  categoryId       Int
+  category         Category @relation(fields: [categoryId], references: [id])
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+}
