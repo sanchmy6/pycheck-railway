@@ -52,3 +52,19 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Database
+
+To add new models to the database you can simply update/extend the `schema.prisma` and create a new migration for your changes.
+
+The command to create a new migration is as follows:
+
+```bash
+npx primsa migrate dev --name <your_migration_name>
+```
+
+Then afterwards run:
+
+```bash
+npx prisma migrate dev
+```
