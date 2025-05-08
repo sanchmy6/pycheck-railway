@@ -22,3 +22,45 @@ export async function createExample(data: { name: string; description: string })
 export async function queryExamples() {
   return await prisma.example.findMany();
 }
+
+
+// Category helpers
+export async function findCategoryById(id: number) {
+  return await prisma.category.findUnique({
+    where: { id },
+  });
+}
+
+export async function createCategory(data: { name: string }) {
+  return await prisma.category.create({
+    data,
+  });
+}
+
+export async function queryCategories() {
+  return await prisma.category.findMany();
+}
+
+
+// Problem helpers
+export async function findProblemById(id: number) {
+  return await prisma.problem.findUnique({
+    where: { id },
+  });
+}
+
+export async function createProblem(data: { name: string; description: string; categoryId: number; code_snippet: string; correct_line: number; correct_reason: string; incorrect_reason: string; hint: string }) {
+  return await prisma.problem.create({
+    data,
+  });
+}
+
+export async function queryProblems() {
+  return await prisma.problem.findMany();
+}
+
+export async function queryProblemsByCategoryId(categoryId: number) {
+  return await prisma.problem.findMany({
+    where: { categoryId },
+  });
+}
