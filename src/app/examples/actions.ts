@@ -11,8 +11,6 @@ export async function getExamples() {
 export async function create(prevState: { error: string | null, values?: { name: string, description: string } }, 
   formData: FormData) {
 
-  "use server";
-  
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
   const values = { name, description };
