@@ -26,18 +26,18 @@ model Category {
   name       String    @unique
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
-  problems   Problem[] // One category has many products
+  problems   Problem[]
 }
 
 model Problem {
   id               Int      @id @default(autoincrement())
   name             String   @unique
-  description      String
-  code_snippet     String
+  description      String   @db.Text
+  code_snippet     String   @db.Text
   correct_line     Int
-  correct_reason   String
-  incorrect_reason String
-  hint             String
+  correct_reason   String   @db.Text
+  incorrect_reason String   @db.Text
+  hint             String   @db.Text
   categoryId       Int
   category         Category @relation(fields: [categoryId], references: [id])
   created_at       DateTime @default(now())

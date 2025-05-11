@@ -3,6 +3,9 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
+  // Delete existing data first
+  await prisma.problem.deleteMany();
+  await prisma.category.deleteMany();
   await prisma.example.deleteMany();
 
   console.log("Seeding database...");
@@ -11,10 +14,10 @@ async function main() {
   await seedExamples();
 
   // Create categories
-  await seedCategories();
+  const categories = await seedCategories();
 
   // Create problems
-  await seedProblems();
+  await seedProblems(categories);
 
   console.log("Database seeded successfully");
 }
@@ -53,15 +56,19 @@ async function seedCategories() {
   });
 
   console.log("Created categories:", { category1, category2 });
+  
+  return { category1, category2 };
 }
 
-async function seedProblems() {
+async function seedProblems(categories: any) {
+  const { category1, category2 } = categories;
+  
   // Create problems
   const problem1 = await prisma.problem.create({
     data: {
       name: "Problem 1",
       description: "This is the first problem",
-      categoryId: 1,
+      categoryId: category1.id,
       code_snippet: "print('Hello, world!')\n",
       correct_line: 1,
       correct_reason: "This is the correct reason",
@@ -74,7 +81,7 @@ async function seedProblems() {
     data: {
       name: "Problem 2",
       description: "This is the second problem",
-      categoryId: 2,
+      categoryId: category2.id,
       code_snippet: "print('Hello, world!')\n print('Bye, world!')\n",
       correct_line: 2,
       correct_reason: "This is the correct reason",
@@ -83,7 +90,40 @@ async function seedProblems() {
     },
   });
   
-  console.log("Created problems:", { problem1, problem2 });
+  const bubbleSortProblem = await prisma.problem.create({
+    data: {
+      name: "Bubble Sort",
+      description: "Implementation of the bubble sort algorithm.",
+      categoryId: category1.id,
+      code_snippet: `
+        def bubble_sort(arr):
+          n = len(arr)
+          
+          for i in range(n):
+              swapped = False
+              
+              for j in range(0, n-i-1):
+                  if arr[j] > arr[j+1]:
+                      arr[j], arr[j+1] = arr[j+1], arr[j]
+                      swapped = True
+                      
+              if not swapped:
+                  break
+                  
+          return arr
+
+        # Example usage
+        arr = [64, 34, 25, 12, 22, 11, 90]
+        sorted_arr = bubble_sort(arr)
+        print("Sorted array:", sorted_arr)`,
+      correct_line: 11,
+      correct_reason: "This is the key comparison in bubble sort that determines whether two adjacent elements need to be swapped. It compares each element with the next one and swaps them if they're in the wrong order.",
+      incorrect_reason: "While this line is part of the bubble sort algorithm, it's not the key comparison that determines when elements should be swapped.",
+      hint: "Look for the line that compares adjacent elements to determine their order.",
+    },
+  });
+  
+  console.log("Created problems:", { problem1, problem2, bubbleSortProblem });
 }
 
 main()
