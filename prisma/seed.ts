@@ -85,29 +85,54 @@ async function seedProblems(categories: any) {
   // Create problems
   const problem1 = await prisma.problem.create({
     data: {
-      name: "Problem 1",
-      description: "This is the first problem",
+      name: "Calculate Average",
+      description: "Find the errors in this function that calculates the average of a list of numbers.",
       categoryId: category1.id,
-      code_snippet: "print('Hello, world!')\n",
-      correct_lines: "1",
+      code_snippet: `def calculate_average(numbers):
+  total = 0
+  count = 0
+  
+  for num in numbers:
+    total = num
+    count += 1
+    
+  if count == 0:
+    return 0
+    
+  average = total * count
+  return average`,
+      correct_lines: "6,11",
       reason: {
-        "1": "This is the correct reason",
+        "6": "Error: Using assignment (=) instead of addition (+=). This overwrites the total instead of adding to it.",
+        "11": "Error: Using multiplication (*) instead of division (/). This calculates the product instead of the average."
       },
-      hint: "This is the hint",
+      hint: "Look for lines that incorrectly handle the total sum and the final calculation.",
     },
   });
 
   const problem2 = await prisma.problem.create({
     data: {
-      name: "Problem 2",
-      description: "This is the second problem",
+      name: "Find Maximum Value",
+      description: "Identify the errors in this function that finds the maximum value in a list.",
       categoryId: category2.id,
-      code_snippet: "print('Hello, world!')\n print('Bye, world!')\n",
-      correct_lines: "2",
+      code_snippet: `def find_maximum(numbers):
+  if not numbers:
+    return 0
+    
+  maximum = 0
+  
+  for num in numbers:
+    if num < maximum:
+      maximum = num
+      
+  return maximum`,
+      correct_lines: "3,5,8",
       reason: {
-        "2": "This is the correct reason",
+        "3": "Error: Returning 0 for empty list instead of None. This could be misleading as 0 might be a valid maximum.",
+        "5": "Error: Initializing maximum to 0 instead of numbers[0]. This fails for lists with all negative numbers.",
+        "8": "Error: Using less than (<) instead of greater than (>). This finds the minimum instead of the maximum."
       },
-      hint: "This is the hint",
+      hint: "Look for lines that incorrectly handle edge cases, initialization, and comparison logic.",
     },
   });
   
@@ -116,27 +141,26 @@ async function seedProblems(categories: any) {
       name: "Bubble Sort",
       description: "Implementation of the bubble sort algorithm.",
       categoryId: category1.id,
-      code_snippet: `
-        def bubble_sort(arr):
-          n = len(arr)
-          
-          for i in range(n):
-              swapped = False
-              
-              for j in range(0, n-i-1):
-                  if arr[j] > arr[j+1]:
-                      arr[j], arr[j+1] = arr[j+1], arr[j]
-                      swapped = True
-                      
-              if not swapped:
-                  break
-                  
-          return arr
+      code_snippet: `def bubble_sort(arr):
+  n = len(arr)
 
-        # Example usage
-        arr = [64, 34, 25, 12, 22, 11, 90]
-        sorted_arr = bubble_sort(arr)
-        print("Sorted array:", sorted_arr)`,
+  for i in range(n):
+      swapped = False
+      
+      for j in range(0, n-i-1):
+          if arr[j] > arr[j+1]:
+              arr[j], arr[j+1] = arr[j+1], arr[j]
+              swapped = True
+              
+      if not swapped:
+          break
+          
+  return arr
+
+  # Example usage
+  arr = [64, 34, 25, 12, 22, 11, 90]
+  sorted_arr = bubble_sort(arr)
+  print("Sorted array:", sorted_arr)`,
       correct_lines: "11,12",
       reason: {
         "11": "This is the key comparison in bubble sort that determines whether two adjacent elements need to be swapped. It compares each element with the next one and swaps them if they're in the wrong order.",
