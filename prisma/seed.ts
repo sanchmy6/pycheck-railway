@@ -51,9 +51,15 @@ async function seedCourses() {
     },
   });
 
-  console.log("Created courses:", { course1 });
+  const course2 = await prisma.course.create({
+    data: {
+      name: "Course 2",
+    },
+  });
 
-  return { course1 };
+  console.log("Created courses:", { course1, course2 });
+
+  return { course1, course2 };
 }
 
 async function seedCategories(courses: any) {
