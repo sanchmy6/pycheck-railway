@@ -23,6 +23,23 @@ export async function queryExamples() {
   return await prisma.example.findMany();
 }
 
+// Course helpers
+export async function findCourseById(id: number) {
+  return await prisma.course.findUnique({
+    where: { id },
+  });
+}
+
+export async function createCourse(data: { name: string; description: string }) {
+  return await prisma.course.create({
+    data,
+  });
+}
+
+export async function queryCourses() {
+  return await prisma.course.findMany();
+}
+
 
 // Category helpers
 export async function findCategoryById(id: number) {
@@ -31,7 +48,7 @@ export async function findCategoryById(id: number) {
   });
 }
 
-export async function createCategory(data: { name: string }) {
+export async function createCategory(data: { name: string; courseId: number }) {
   return await prisma.category.create({
     data,
   });
@@ -41,6 +58,11 @@ export async function queryCategories() {
   return await prisma.category.findMany();
 }
 
+export async function queryCategoriesByCourseId(courseId: number) {
+  return await prisma.category.findMany({
+    where: { courseId },
+  });
+}
 
 // Problem helpers
 export async function findProblemById(id: number) {
