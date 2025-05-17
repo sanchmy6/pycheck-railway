@@ -13,8 +13,11 @@ async function main() {
   // Create examples
   await seedExamples();
 
+  // Create courses
+  const courses = await seedCourses();
+
   // Create categories
-  const categories = await seedCategories();
+  const categories = await seedCategories(courses);
 
   // Create problems
   await seedProblems(categories);
@@ -41,17 +44,33 @@ async function seedExamples() {
   console.log("Created examples:", { example1, example2 });
 }
 
-async function seedCategories() {
+async function seedCourses() {
+  const course1 = await prisma.course.create({
+    data: {
+      name: "Course 1",
+    },
+  });
+
+  console.log("Created courses:", { course1 });
+
+  return { course1 };
+}
+
+async function seedCategories(courses: any) {
+  const { course1} = courses
+
   // Create categories
   const category1 = await prisma.category.create({
     data: {
       name: "Category 1",
+      courseId: course1.id,
     },
   });
 
   const category2 = await prisma.category.create({
     data: {
       name: "Category 2",
+      courseId: course1.id,
     },
   });
 
@@ -70,9 +89,10 @@ async function seedProblems(categories: any) {
       description: "This is the first problem",
       categoryId: category1.id,
       code_snippet: "print('Hello, world!')\n",
-      correct_line: 1,
-      correct_reason: "This is the correct reason",
-      incorrect_reason: "This is the incorrect reason",
+      correct_lines: "1",
+      reason: {
+        "1": "This is the correct reason",
+      },
       hint: "This is the hint",
     },
   });
@@ -83,9 +103,10 @@ async function seedProblems(categories: any) {
       description: "This is the second problem",
       categoryId: category2.id,
       code_snippet: "print('Hello, world!')\n print('Bye, world!')\n",
-      correct_line: 2,
-      correct_reason: "This is the correct reason",
-      incorrect_reason: "This is the incorrect reason",
+      correct_lines: "2",
+      reason: {
+        "2": "This is the correct reason",
+      },
       hint: "This is the hint",
     },
   });
@@ -116,9 +137,11 @@ async function seedProblems(categories: any) {
         arr = [64, 34, 25, 12, 22, 11, 90]
         sorted_arr = bubble_sort(arr)
         print("Sorted array:", sorted_arr)`,
-      correct_line: 11,
-      correct_reason: "This is the key comparison in bubble sort that determines whether two adjacent elements need to be swapped. It compares each element with the next one and swaps them if they're in the wrong order.",
-      incorrect_reason: "While this line is part of the bubble sort algorithm, it's not the key comparison that determines when elements should be swapped.",
+      correct_lines: "11,12",
+      reason: {
+        "11": "This is the key comparison in bubble sort that determines whether two adjacent elements need to be swapped. It compares each element with the next one and swaps them if they're in the wrong order.",
+        "12": "Second reason",
+      },
       hint: "Look for the line that compares adjacent elements to determine their order.",
     },
   });
