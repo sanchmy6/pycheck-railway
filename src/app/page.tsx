@@ -32,6 +32,14 @@ export default function Home() {
               View Categories
             </Link>
           </div>
+          <div className="mt-6">
+            <Link 
+              href="/courses" 
+              className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md text-lg font-medium transition-colors"
+            >
+              View Courses
+            </Link>
+          </div>
         </div>
       </main>
     </div>
