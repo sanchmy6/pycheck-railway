@@ -7,10 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node --project prisma/tsconfig-seed.json prisma/seed.ts"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node --project prisma/tsconfig-seed.json prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.7.0",
