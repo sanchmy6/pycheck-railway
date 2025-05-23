@@ -21,25 +21,34 @@ model Example {
   updated_at  DateTime @updatedAt
 }
 
+model Course {
+  id         Int        @id @default(autoincrement())
+  name       String     @unique
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  categories Category[]
+}
+
 model Category {
   id         Int       @id @default(autoincrement())
   name       String    @unique
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
   problems   Problem[]
+  courseId   Int
+  course     Course    @relation(fields: [courseId], references: [id])
 }
 
 model Problem {
-  id               Int      @id @default(autoincrement())
-  name             String   @unique
-  description      String   @db.Text
-  code_snippet     String   @db.Text
-  correct_line     Int
-  correct_reason   String   @db.Text
-  incorrect_reason String   @db.Text
-  hint             String   @db.Text
-  categoryId       Int
-  category         Category @relation(fields: [categoryId], references: [id])
-  created_at       DateTime @default(now())
-  updated_at       DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  name          String   @unique
+  description   String   @db.Text
+  code_snippet  String   @db.Text
+  correct_lines String   @db.Text
+  reason        Json     @db.Json
+  hint          String   @db.Text
+  categoryId    Int
+  category      Category @relation(fields: [categoryId], references: [id])
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
 }

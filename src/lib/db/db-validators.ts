@@ -19,6 +19,21 @@ export function validateExample(data: Partial<ExampleCreateInput>): { valid: boo
   return { valid: true };
 }
 
+// Course Validators
+type CourseCreateInput = Prisma.CourseCreateInput;
+
+export function validateCourse(data: Partial<CourseCreateInput>): { valid: boolean; error?: string } {
+  if (!data.name || data.name.trim() === '') {
+    return { valid: false, error: "Name is required" };
+  }
+
+  if (data.name.length > 100) {
+    return { valid: false, error: "Name cannot exceed 100 characters" };
+  }
+  
+  return { valid: true };
+}
+
 // Category Validators
 type CategoryCreateInput = Prisma.CategoryCreateInput;
 
