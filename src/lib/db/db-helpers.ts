@@ -71,7 +71,15 @@ export async function findProblemById(id: number) {
   });
 }
 
-export async function createProblem(data: { name: string; description: string; categoryId: number; code_snippet: string; correct_line: number; correct_reason: string; incorrect_reason: string; hint: string }) {
+export async function createProblem(data: { 
+  name: string; 
+  description: string; 
+  categoryId: number; 
+  code_snippet: string; 
+  correct_lines: string; 
+  reason: Record<string, string>; 
+  hint: string 
+}) {
   return await prisma.problem.create({
     data,
   });
