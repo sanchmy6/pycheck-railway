@@ -20,7 +20,7 @@ export default function TeacherLoginPage() {
       
       if (result.success && result.token) {
         sessionStorage.setItem("teacher_token", result.token);
-        router.push("/teacher/create");
+        router.push("/teacher/overview");
       } else {
         setError(result.error || "Authentication failed");
       }

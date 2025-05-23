@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CodeEditor } from "../components/CodeEditor";
-import { CategorySelector } from "../components/CategorySelector";
-import { CourseSelector } from "../components/CourseSelector";
-import { createProblemAction, getCourses, getCategoriesByCourse, createCategoryAction, createCourseAction } from "../actions";
+import Link from "next/link";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { CodeEditor } from "../../../components/CodeEditor";
+import { CategorySelector } from "../../../components/CategorySelector";
+import { CourseSelector } from "../../../components/CourseSelector";
+import { getProblemByIdOptimized, updateProblemAction, getCategoriesByCourse, createCategoryAction, createCourseAction } from "../../../actions";
 
 interface Course {
   id: number;
@@ -17,13 +19,17 @@ interface Category {
   name: string;
 }
 
-export default function CreateProblemPage() {
+interface EditProblemClientProps {
+  problemId: number;
+  initialCourses: Course[];
+}
+
+export function EditProblemClient({ problemId, initialCourses }: EditProblemClientProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authToken, setAuthToken] = useState("");
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [courses, setCourses] = useState<Course[]>(initialCourses);
+  const [categories, setCategories] = useState<Category[]>([]);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -40,6 +46,24 @@ export default function CreateProblemPage() {
   const [success, setSuccess] = useState("");
   
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const { data: problemData, isLoading, error: queryError } = useQuery({
+    queryKey: ["problem", problemId, authToken],
+    queryFn: async () => {
+      if (!authToken) return null;
+      const result = await getProblemByIdOptimized(authToken, problemId);
+      if (!result.success) throw new Error(result.error);
+      return result.problem;
+    },
+    enabled: !!authToken && !!problemId,
+    staleTime: 15 * 60 * 1000, // 15 minutes fresh for edit forms
+    gcTime: 60 * 60 * 1000, // Keep in cache for 1 hour
+    retry: 1,
+    retryDelay: 300,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
 
   useEffect(() => {
     const token = sessionStorage.getItem("teacher_token");
@@ -50,24 +74,48 @@ export default function CreateProblemPage() {
     
     setAuthToken(token);
     setIsAuthenticated(true);
-    loadCourses();
   }, [router]);
 
-  const loadCourses = async () => {
-    try {
-      const courseList = await getCourses();
-      setCourses(courseList);
-    } catch (error) {
-      setError("Failed to load courses");
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    if (problemData) {
+      const correctLinesArray = problemData.correct_lines.split(",").map(line => parseInt(line.trim()));
+      const courseId = problemData.category.course.id;
+      const categoryId = problemData.category.id;
+      
+      setFormData({
+        name: problemData.name,
+        description: problemData.description,
+        courseId: courseId.toString(),
+        categoryId: categoryId.toString(),
+        codeSnippet: problemData.code_snippet,
+        hint: problemData.hint
+      });
+      
+      setSelectedLines(correctLinesArray);
+      setReasons(problemData.reason as Record<string, string>);
+
+      loadCategoriesForCourse(courseId);
     }
-  };
+  }, [problemData]);
 
   const loadCategoriesForCourse = async (courseId: number) => {
+    // Check cache first
+    const cacheKey = ["categories", courseId];
+    const cachedCategories = queryClient.getQueryData(cacheKey);
+    
+    if (cachedCategories) {
+      setCategories(cachedCategories as Category[]);
+      return;
+    }
+    
     try {
       const categoryList = await getCategoriesByCourse(courseId);
       setCategories(categoryList);
+      
+      // Cache the result
+      queryClient.setQueryData(cacheKey, categoryList, {
+        updatedAt: Date.now(),
+      });
     } catch (error) {
       setError("Failed to load categories");
     }
@@ -100,6 +148,10 @@ export default function CreateProblemPage() {
     
     if (result.success && result.category) {
       setCategories(prev => [...prev, result.category!]);
+      
+      // Update cache
+      const cacheKey = ["categories", parseInt(formData.courseId)];
+      queryClient.setQueryData(cacheKey, [...categories, result.category]);
     }
     
     return result;
@@ -110,6 +162,9 @@ export default function CreateProblemPage() {
     
     if (result.success && result.course) {
       setCourses(prev => [...prev, result.course!]);
+      
+      // Update courses cache
+      queryClient.setQueryData(["courses"], [...courses, result.course]);
     }
     
     return result;
@@ -193,7 +248,7 @@ export default function CreateProblemPage() {
     setIsSubmitting(true);
 
     try {
-      const result = await createProblemAction(authToken, {
+      const result = await updateProblemAction(authToken, problemId, {
         name: formData.name.trim(),
         description: formData.description.trim(),
         categoryId: parseInt(formData.categoryId),
@@ -204,20 +259,17 @@ export default function CreateProblemPage() {
       });
 
       if (result.success) {
-        setSuccess("Problem created successfully!");
-        setFormData({
-          name: "",
-          description: "",
-          courseId: "",
-          categoryId: "",
-          codeSnippet: "",
-          hint: ""
-        });
-        setSelectedLines([]);
-        setReasons({});
-        setCategories([]);
+        setSuccess("Problem updated successfully!");
+        
+        // Invalidate related caches for fresh data
+        queryClient.invalidateQueries({ queryKey: ["problem", problemId] });
+        queryClient.invalidateQueries({ queryKey: ["courses"] });
+        
+        setTimeout(() => {
+          router.push("/teacher/overview");
+        }, 1500);
       } else {
-        setError(result.error || "Failed to create problem");
+        setError(result.error || "Failed to update problem");
       }
     } catch (error) {
       setError("An unexpected error occurred. Please try again.");
@@ -228,32 +280,62 @@ export default function CreateProblemPage() {
 
   const handleLogout = () => {
     sessionStorage.removeItem("teacher_token");
+    queryClient.clear(); // Clear all caches on logout
     router.push("/teacher");
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+          <div className="text-lg">Loading problem...</div>
+        </div>
       </div>
     );
   }
 
   if (!isAuthenticated) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+          <div className="text-lg">Authenticating...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (queryError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-red-600">Failed to load problem data</div>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create New Problem</h1>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-          >
-            Logout
-          </button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Edit Problem</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">Update problem information</p>
+          </div>
+          <div className="flex gap-4">
+            <Link
+              href="/teacher/overview"
+              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+            >
+              Back to Overview
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+            >
+              Logout
+            </button>
+          </div>
         </div>
 
         <div className="max-w-4xl mx-auto">
@@ -372,13 +454,19 @@ export default function CreateProblemPage() {
                 </div>
               </div>
 
-              <div className="mt-6 flex justify-end">
+              <div className="mt-6 flex justify-end gap-3">
+                <Link
+                  href="/teacher/overview"
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
+                >
+                  Cancel
+                </Link>
                 <button
                   type="submit"
                   disabled={isSubmitting}
                   className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isSubmitting ? "Creating..." : "Create Problem"}
+                  {isSubmitting ? "Updating..." : "Update Problem"}
                 </button>
               </div>
             </div>
