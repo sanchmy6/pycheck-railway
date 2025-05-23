@@ -22,11 +22,14 @@ model Example {
 }
 
 model Course {
-  id         Int        @id @default(autoincrement())
-  name       String     @unique
-  created_at DateTime   @default(now())
-  updated_at DateTime   @updatedAt
-  categories Category[]
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  description String     @db.Text
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+  categories  Category[]
+
+  @@index([name])
 }
 
 model Category {
@@ -37,6 +40,9 @@ model Category {
   problems   Problem[]
   courseId   Int
   course     Course    @relation(fields: [courseId], references: [id])
+
+  @@index([courseId])
+  @@index([name])
 }
 
 model Problem {
@@ -51,4 +57,7 @@ model Problem {
   category      Category @relation(fields: [categoryId], references: [id])
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([name])
 }
