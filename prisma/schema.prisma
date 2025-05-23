@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Example {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+model Course {
+  id         Int        @id @default(autoincrement())
+  name       String     @unique
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  categories Category[]
+}
+
+model Category {
+  id         Int       @id @default(autoincrement())
+  name       String    @unique
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  problems   Problem[]
+  courseId   Int
+  course     Course    @relation(fields: [courseId], references: [id])
+}
+
+model Problem {
+  id            Int      @id @default(autoincrement())
+  name          String   @unique
+  description   String   @db.Text
+  code_snippet  String   @db.Text
+  correct_lines String   @db.Text
+  reason        Json     @db.Json
+  hint          String   @db.Text
+  categoryId    Int
+  category      Category @relation(fields: [categoryId], references: [id])
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
