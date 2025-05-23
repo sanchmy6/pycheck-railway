@@ -40,6 +40,14 @@ export default function Home() {
               View Courses
             </Link>
           </div>
+          <div className="mt-8 pt-4 border-t border-gray-300 dark:border-gray-700">
+            <Link 
+              href="/teacher" 
+              className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-6 rounded-md text-sm font-medium transition-colors"
+            >
+              Teacher Portal
+            </Link>
+          </div>
         </div>
       </main>
     </div>
