@@ -46,8 +46,8 @@ export default function EditCoursePage() {
       } else {
         setError(result.error || "Failed to load course");
       }
-    } catch (error) {
-      setError("Failed to load course");
+    } catch {
+      setError("Failed to load course data. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -101,7 +101,7 @@ export default function EditCoursePage() {
       } else {
         setError(result.error || "Failed to update course");
       }
-    } catch (error) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);

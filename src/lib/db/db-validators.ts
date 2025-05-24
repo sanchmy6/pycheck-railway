@@ -70,16 +70,12 @@ export function validateProblem(data: Partial<ProblemCreateInput>): { valid: boo
     return { valid: false, error: "Code snippet is required" };
   }
 
-  if (!data.correct_line || data.correct_line < 1) {
-    return { valid: false, error: "Correct line is required" };
+  if (!data.correct_lines || data.correct_lines.trim() === '') {
+    return { valid: false, error: "Correct lines are required" };
   }
 
-  if (!data.correct_reason || data.correct_reason.trim() === '') {
-    return { valid: false, error: "Correct reason is required" };
-  }
-
-  if (!data.incorrect_reason || data.incorrect_reason.trim() === '') {
-    return { valid: false, error: "Incorrect reason is required" };
+  if (!data.reason) {
+    return { valid: false, error: "Reasons are required" };
   }
 
   if (!data.hint || data.hint.trim() === '') {
@@ -89,7 +85,6 @@ export function validateProblem(data: Partial<ProblemCreateInput>): { valid: boo
   if (!data.category) {
     return { valid: false, error: "Category is required" };
   }
-  
 
   return { valid: true };
 }

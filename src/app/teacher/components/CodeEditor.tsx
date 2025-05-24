@@ -22,8 +22,6 @@ export function CodeEditor({
 }: CodeEditorProps) {
   const [isDarkMode, setIsDarkMode] = useState(true);
   
-  const codeLines = code.split("\n");
-
   useEffect(() => {
     const theme = document.documentElement.getAttribute("data-theme");
     setIsDarkMode(theme === "dark");

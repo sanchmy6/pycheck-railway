@@ -58,8 +58,8 @@ export default function EditCategoryPage() {
       }
 
       setCourses(coursesData);
-    } catch (error) {
-      setError("Failed to load data");
+    } catch {
+      setError("Failed to load category data. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -108,7 +108,7 @@ export default function EditCategoryPage() {
       } else {
         setError(result.error || "Failed to update category");
       }
-    } catch (error) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);

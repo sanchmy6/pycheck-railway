@@ -10,7 +10,6 @@ interface Category {
 interface CategorySelectorProps {
   categories: Category[];
   selectedCategoryId: string;
-  courseId: string;
   onCategoryChange: (categoryId: string) => void;
   onCreateCategory: (name: string) => Promise<{ success: boolean; category?: Category; error?: string }>;
   disabled?: boolean;
@@ -19,7 +18,6 @@ interface CategorySelectorProps {
 export function CategorySelector({
   categories,
   selectedCategoryId,
-  courseId,
   onCategoryChange,
   onCreateCategory,
   disabled = false
@@ -67,7 +65,7 @@ export function CategorySelector({
       } else {
         setError(result.error || "Failed to create category");
       }
-    } catch (error) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);

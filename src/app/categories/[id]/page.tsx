@@ -3,7 +3,11 @@ import { CodeSnippet } from "../components/CodeSnippet";
 
 export const dynamic = "force-dynamic";
 
-export default async function CategoryPage({ params }: { params: { id: string } }) {
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default async function CategoryPage({ params }: PageProps) {
   const { id } = await params;
 
   const category = await getCategoryById(id);

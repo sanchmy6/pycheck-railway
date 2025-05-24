@@ -57,19 +57,24 @@ export default function CreateProblemPage() {
     try {
       const courseList = await getCourses();
       setCourses(courseList);
-    } catch (error) {
-      setError("Failed to load courses");
+    } catch {
+      setError("Failed to load courses. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const loadCategoriesForCourse = async (courseId: number) => {
+  const loadCategories = async (courseId: string) => {
+    if (!courseId) {
+      setCategories([]);
+      return;
+    }
+
     try {
-      const categoryList = await getCategoriesByCourse(courseId);
-      setCategories(categoryList);
-    } catch (error) {
-      setError("Failed to load categories");
+      const result = await getCategoriesByCourse(parseInt(courseId));
+      setCategories(result);
+    } catch {
+      setError("Failed to load categories. Please try again.");
     }
   };
 
@@ -77,8 +82,7 @@ export default function CreateProblemPage() {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     if (field === "courseId" && value) {
-      const courseId = parseInt(value);
-      loadCategoriesForCourse(courseId);
+      loadCategories(value);
       setFormData(prev => ({ ...prev, categoryId: "" }));
     }
   };
@@ -219,7 +223,7 @@ export default function CreateProblemPage() {
       } else {
         setError(result.error || "Failed to create problem");
       }
-    } catch (error) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -316,7 +320,6 @@ export default function CreateProblemPage() {
                     <CategorySelector
                       categories={categories}
                       selectedCategoryId={formData.categoryId}
-                      courseId={formData.courseId}
                       onCategoryChange={handleCategoryChange}
                       onCreateCategory={handleCreateCategory}
                       disabled={!formData.courseId}

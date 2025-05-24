@@ -1,7 +1,11 @@
 import { EditProblemClient } from "./EditProblemClient";
 import { getCourses } from "../../../actions";
 
-export default async function EditProblemPage({ params }: { params: { id: string } }) {
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default async function EditProblemPage({ params }: PageProps) {
   const { id } = await params;
   const problemId = parseInt(id);
 

@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { validateCourse } from "@/lib/db/db-validators";
 import { queryCourses, findCourseById, queryCategoriesByCourseId } from "@/lib/db/db-helpers";
 
 export async function getCourses() {

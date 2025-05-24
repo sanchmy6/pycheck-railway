@@ -116,8 +116,8 @@ export function EditProblemClient({ problemId, initialCourses }: EditProblemClie
       queryClient.setQueryData(cacheKey, categoryList, {
         updatedAt: Date.now(),
       });
-    } catch (error) {
-      setError("Failed to load categories");
+    } catch {
+      setError("Failed to load categories. Please try again.");
     }
   };
 
@@ -271,7 +271,7 @@ export function EditProblemClient({ problemId, initialCourses }: EditProblemClie
       } else {
         setError(result.error || "Failed to update problem");
       }
-    } catch (error) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -398,7 +398,6 @@ export function EditProblemClient({ problemId, initialCourses }: EditProblemClie
                     <CategorySelector
                       categories={categories}
                       selectedCategoryId={formData.categoryId}
-                      courseId={formData.courseId}
                       onCategoryChange={handleCategoryChange}
                       onCreateCategory={handleCreateCategory}
                       disabled={!formData.courseId}

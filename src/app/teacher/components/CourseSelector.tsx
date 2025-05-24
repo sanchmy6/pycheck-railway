@@ -76,7 +76,7 @@ export function CourseSelector({
       } else {
         setError(result.error || "Failed to create course");
       }
-    } catch (error) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);

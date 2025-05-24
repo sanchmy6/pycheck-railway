@@ -1,7 +1,7 @@
 "use server";
 
 import { verifyTeacherPassword, generateAuthToken } from "@/lib/auth";
-import { createProblem, queryCategories, queryCourses, queryCategoriesByCourseId, createCategory, createCourse, getCoursesWithStats as dbGetCoursesWithStats, updateCourse, updateCategory, updateProblem, findCourseById, findCategoryById, findProblemById, getCoursesWithBasicStats, getCategoriesWithProblemsForCourse, getProblemWithCategoryAndCourse, getCategoryWithCourse, getCoursesWithCompleteData } from "@/lib/db/db-helpers";
+import { createProblem, queryCategories, queryCourses, queryCategoriesByCourseId, createCategory, createCourse, updateCourse, updateCategory, updateProblem, findCourseById, findCategoryById, findProblemById, getCoursesWithBasicStats, getCategoriesWithProblemsForCourse, getProblemWithCategoryAndCourse, getCategoryWithCourse, getCoursesWithCompleteData } from "@/lib/db/db-helpers";
 import { revalidatePath } from "next/cache";
 
 export async function authenticateTeacher(password: string) {
@@ -39,8 +39,9 @@ export async function createCourseAction(authToken: string, name: string, descri
   try {
     const course = await createCourse({ name, description });
     return { success: true, course };
-  } catch (error: any) {
-    if (error.code === "P2002") {
+  } catch (error: unknown) {
+    const err = error as { code?: string };
+    if (err.code === "P2002") {
       return { success: false, error: "A course with this name already exists" };
     }
     return { success: false, error: "Failed to create course. Please try again." };
@@ -55,8 +56,9 @@ export async function createCategoryAction(authToken: string, name: string, cour
   try {
     const category = await createCategory({ name, courseId });
     return { success: true, category };
-  } catch (error: any) {
-    if (error.code === "P2002") {
+  } catch (error: unknown) {
+    const err = error as { code?: string };
+    if (err.code === "P2002") {
       return { success: false, error: "A category with this name already exists" };
     }
     return { success: false, error: "Failed to create category. Please try again." };
@@ -94,21 +96,22 @@ export async function createProblemAction(
 
     revalidatePath("/categories");
     return { success: true };
-  } catch (error: any) {
-    console.error("Problem creation error:", error);
+  } catch (error: unknown) {
+    const err = error as { code?: string; meta?: { target?: string[] }; message?: string };
+    console.error("Problem creation error:", err);
     
-    if (error.code === "P2002") {
-      if (error.meta?.target?.includes("name")) {
+    if (err.code === "P2002") {
+      if (err.meta?.target?.includes("name")) {
         return { success: false, error: "A problem with this name already exists. Please choose a different name." };
       }
       return { success: false, error: "This problem conflicts with an existing entry. Please check your input." };
     }
     
-    if (error.code === "P2003") {
+    if (err.code === "P2003") {
       return { success: false, error: "The selected category is invalid. Please select a valid category." };
     }
     
-    if (error.message?.includes("JSON")) {
+    if (err.message?.includes("JSON")) {
       return { success: false, error: "There was an issue with the problem data format. Please try again." };
     }
     
@@ -126,8 +129,9 @@ export async function updateCourseAction(authToken: string, id: number, name: st
     revalidatePath("/teacher/overview");
     revalidatePath("/courses");
     return { success: true, course };
-  } catch (error: any) {
-    if (error.code === "P2002") {
+  } catch (error: unknown) {
+    const err = error as { code?: string };
+    if (err.code === "P2002") {
       return { success: false, error: "A course with this name already exists" };
     }
     return { success: false, error: "Failed to update course. Please try again." };
@@ -144,11 +148,12 @@ export async function updateCategoryAction(authToken: string, id: number, name: 
     revalidatePath("/teacher/overview");
     revalidatePath("/categories");
     return { success: true, category };
-  } catch (error: any) {
-    if (error.code === "P2002") {
+  } catch (error: unknown) {
+    const err = error as { code?: string };
+    if (err.code === "P2002") {
       return { success: false, error: "A category with this name already exists" };
     }
-    if (error.code === "P2003") {
+    if (err.code === "P2003") {
       return { success: false, error: "The selected course is invalid" };
     }
     return { success: false, error: "Failed to update category. Please try again." };
@@ -188,21 +193,22 @@ export async function updateProblemAction(
     revalidatePath("/categories");
     revalidatePath("/teacher/overview");
     return { success: true };
-  } catch (error: any) {
-    console.error("Problem update error:", error);
+  } catch (error: unknown) {
+    const err = error as { code?: string; meta?: { target?: string[] }; message?: string };
+    console.error("Problem update error:", err);
     
-    if (error.code === "P2002") {
-      if (error.meta?.target?.includes("name")) {
+    if (err.code === "P2002") {
+      if (err.meta?.target?.includes("name")) {
         return { success: false, error: "A problem with this name already exists. Please choose a different name." };
       }
       return { success: false, error: "This problem conflicts with an existing entry. Please check your input." };
     }
     
-    if (error.code === "P2003") {
+    if (err.code === "P2003") {
       return { success: false, error: "The selected category is invalid. Please select a valid category." };
     }
     
-    if (error.message?.includes("JSON")) {
+    if (err.message?.includes("JSON")) {
       return { success: false, error: "There was an issue with the problem data format. Please try again." };
     }
     
@@ -218,7 +224,7 @@ export async function getCourseById(authToken: string, id: number) {
   try {
     const course = await findCourseById(id);
     return { success: true, course };
-  } catch (error) {
+  } catch {
     return { success: false, error: "Failed to fetch course" };
   }
 }
@@ -231,7 +237,7 @@ export async function getCategoryById(authToken: string, id: number) {
   try {
     const category = await findCategoryById(id);
     return { success: true, category };
-  } catch (error) {
+  } catch {
     return { success: false, error: "Failed to fetch category" };
   }
 }
@@ -244,7 +250,7 @@ export async function getProblemById(authToken: string, id: number) {
   try {
     const problem = await findProblemById(id);
     return { success: true, problem };
-  } catch (error) {
+  } catch {
     return { success: false, error: "Failed to fetch problem" };
   }
 }
@@ -262,7 +268,7 @@ export async function getCategoriesWithProblemsForCourseAction(authToken: string
   try {
     const categories = await getCategoriesWithProblemsForCourse(courseId);
     return { success: true, categories };
-  } catch (error) {
+  } catch {
     return { success: false, error: "Failed to fetch categories" };
   }
 }
@@ -275,7 +281,7 @@ export async function getProblemByIdOptimized(authToken: string, id: number) {
   try {
     const problem = await getProblemWithCategoryAndCourse(id);
     return { success: true, problem };
-  } catch (error) {
+  } catch {
     return { success: false, error: "Failed to fetch problem" };
   }
 }
@@ -288,7 +294,7 @@ export async function getCategoryByIdOptimized(authToken: string, id: number) {
   try {
     const category = await getCategoryWithCourse(id);
     return { success: true, category };
-  } catch (error) {
+  } catch {
     return { success: false, error: "Failed to fetch category" };
   }
 } 
