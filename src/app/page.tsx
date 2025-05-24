@@ -18,22 +18,6 @@ export default function Home() {
           <h1 className="text-3xl font-bold">Welcome to PyCheck</h1>
           <div className="mt-6">
             <Link 
-              href="/examples" 
-              className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md text-lg font-medium transition-colors"
-            >
-              View Examples
-            </Link>
-          </div>
-          <div className="mt-6">
-            <Link 
-              href="/categories" 
-              className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md text-lg font-medium transition-colors"
-            >
-              View Categories
-            </Link>
-          </div>
-          <div className="mt-6">
-            <Link 
               href="/courses" 
               className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md text-lg font-medium transition-colors"
             >
