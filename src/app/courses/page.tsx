@@ -8,7 +8,7 @@ export default async function CoursesPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold dark:text-white">Categories</h1>
+      <h1 className="text-3xl mb-4 font-bold dark:text-white">Courses</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         {courses.map((course) => (
           <div key={course.id} className="bg-gray-50 border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700">
