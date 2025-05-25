@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authenticateTeacher } from "./actions";
+import { BackButton } from "@/components/BackButton";
 
 export default function TeacherLoginPage() {
   const [password, setPassword] = useState("");
@@ -35,6 +36,9 @@ export default function TeacherLoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
       <div className="max-w-md w-full space-y-8">
+        <div className="absolute top-8 left-8">
+          <BackButton href="/" label="Back to Home" />
+        </div>
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
             Teacher Access

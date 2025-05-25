@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getCategoriesByCourseId, getCourseById } from "../actions";
+import { BackButton } from "@/components/BackButton";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,7 @@ export default async function CoursePage({ params }: PageProps) {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <BackButton href="/courses" label="Back to Courses" />
       <h1 className="text-3xl font-bold dark:text-white">{course?.name}</h1>
       <p className="text-gray-600 dark:text-gray-400 mb-8">{course?.description}</p>
       

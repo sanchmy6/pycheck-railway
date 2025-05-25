@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { BackButton } from "@/components/BackButton";
 
 interface Course {
   id: number;
@@ -96,6 +97,7 @@ export function TeacherOverviewClient({ initialCourses }: TeacherOverviewClientP
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
+        <BackButton href="/" label="Back to Home" />
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Teacher Dashboard</h1>
           <div className="flex gap-4">

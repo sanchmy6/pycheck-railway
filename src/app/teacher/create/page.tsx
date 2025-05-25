@@ -6,6 +6,7 @@ import { CodeEditor } from "../components/CodeEditor";
 import { CategorySelector } from "../components/CategorySelector";
 import { CourseSelector } from "../components/CourseSelector";
 import { createProblemAction, getCourses, getCategoriesByCourse, createCategoryAction, createCourseAction } from "../actions";
+import { BackButton } from "@/components/BackButton";
 
 interface Course {
   id: number;
@@ -250,6 +251,7 @@ export default function CreateProblemPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
+        <BackButton href="/teacher/overview" label="Back to Dashboard" />
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create New Problem</h1>
           <button

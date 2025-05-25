@@ -1,5 +1,6 @@
-import { getCategoryById, getProblemsByCategoryId } from "../actions";
+import { getCategoryById, getProblemsByCategoryId, getCategoryWithCourse } from "../actions";
 import { CodeSnippet } from "../components/CodeSnippet";
+import { BackButton } from "@/components/BackButton";
 
 export const dynamic = "force-dynamic";
 
@@ -11,10 +12,17 @@ export default async function CategoryPage({ params }: PageProps) {
   const { id } = await params;
 
   const category = await getCategoryById(id);
+  const categoryWithCourse = await getCategoryWithCourse(id);
   const problems = await getProblemsByCategoryId(id);
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {categoryWithCourse?.course && (
+        <BackButton 
+          href={`/courses/${categoryWithCourse.course.id}`} 
+          label={`Back to ${categoryWithCourse.course.name}`} 
+        />
+      )}
       <h1 className="text-3xl font-bold mb-6 dark:text-white">{category?.name}</h1>
       
       <div className="bg-gray-100 border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700">
@@ -23,7 +31,7 @@ export default async function CategoryPage({ params }: PageProps) {
         <p className="mb-4">
           <span className="font-medium text-lg"><strong>Important:</strong></span> The errors you are looking for are <strong>logical or conceptual errors</strong>, not syntax errors. 
           Focus on issues with program logic, algorithm correctness, variable usage, or conceptual mistakes in the code implementation.
-        </p>
+        </p> 
         
         <div className="space-y-8">
           {problems.map((problem) => (

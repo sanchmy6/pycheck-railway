@@ -8,6 +8,7 @@ import { CodeEditor } from "../../../components/CodeEditor";
 import { CategorySelector } from "../../../components/CategorySelector";
 import { CourseSelector } from "../../../components/CourseSelector";
 import { getProblemByIdOptimized, updateProblemAction, getCategoriesByCourse, createCategoryAction, createCourseAction } from "../../../actions";
+import { BackButton } from "@/components/BackButton";
 
 interface Course {
   id: number;
@@ -317,6 +318,7 @@ export function EditProblemClient({ problemId, initialCourses }: EditProblemClie
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
+        <BackButton href="/teacher/overview" label="Back to Dashboard" />
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Edit Problem</h1>
