@@ -39,7 +39,7 @@ model Category {
   updated_at DateTime  @updatedAt
   problems   Problem[]
   courseId   Int
-  course     Course    @relation(fields: [courseId], references: [id])
+  course     Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([courseId])
   @@index([name])
@@ -54,7 +54,7 @@ model Problem {
   reason        Json     @db.Json
   hint          String   @db.Text
   categoryId    Int
-  category      Category @relation(fields: [categoryId], references: [id])
+  category      Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 

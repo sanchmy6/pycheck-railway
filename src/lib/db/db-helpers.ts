@@ -309,3 +309,22 @@ export async function getCategoryWithCourse(categoryId: number) {
     }
   });
 }
+
+// Delete helpers
+export async function deleteCourse(id: number) {
+  return await optimizedPrisma.course.delete({
+    where: { id },
+  });
+}
+
+export async function deleteCategory(id: number) {
+  return await optimizedPrisma.category.delete({
+    where: { id },
+  });
+}
+
+export async function deleteProblem(id: number) {
+  return await optimizedPrisma.problem.delete({
+    where: { id },
+  });
+}
