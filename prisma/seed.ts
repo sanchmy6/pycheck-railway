@@ -48,12 +48,14 @@ async function seedCourses() {
   const course1 = await prisma.course.create({
     data: {
       name: "Course 1",
+      description: "Introduction to Programming Fundamentals and Problem Solving",
     },
   });
 
   const course2 = await prisma.course.create({
     data: {
       name: "Course 2",
+      description: "Advanced Programming Concepts and Data Structures",
     },
   });
 

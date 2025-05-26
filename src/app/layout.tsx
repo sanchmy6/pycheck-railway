@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
+import { QueryProvider } from "./providers/QueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,6 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "PyCheck",
+  description: "",
 };
 
 export default function RootLayout({
@@ -27,8 +29,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeToggle/>
-        {children}
+        <QueryProvider>
+          <ThemeToggle/>
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );
