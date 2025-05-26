@@ -1,7 +1,7 @@
 "use server";
 
 import { verifyTeacherPassword, generateAuthToken } from "@/lib/auth";
-import { createProblem, queryCategories, queryCourses, queryCategoriesByCourseId, createCategory, createCourse, updateCourse, updateCategory, updateProblem, findCourseById, findCategoryById, findProblemById, getCoursesWithBasicStats, getCategoriesWithProblemsForCourse, getProblemWithCategoryAndCourse, getCategoryWithCourse, getCoursesWithCompleteData } from "@/lib/db/db-helpers";
+import { createProblem, queryCategories, queryCourses, queryCategoriesByCourseId, createCategory, createCourse, updateCourse, updateCategory, updateProblem, findCourseById, findCategoryById, findProblemById, getCoursesWithBasicStats, getCategoriesWithProblemsForCourse, getProblemWithCategoryAndCourse, getCategoryWithCourse, getCoursesWithCompleteData, deleteCourse, deleteCategory, deleteProblem } from "@/lib/db/db-helpers";
 import { revalidatePath } from "next/cache";
 
 export async function authenticateTeacher(password: string) {
@@ -296,5 +296,51 @@ export async function getCategoryByIdOptimized(authToken: string, id: number) {
     return { success: true, category };
   } catch {
     return { success: false, error: "Failed to fetch category" };
+  }
+}
+
+// Delete
+export async function deleteCourseAction(authToken: string, id: number) {
+  if (!authToken || authToken.length !== 64) {
+    return { success: false, error: "Invalid authentication" };
+  }
+
+  try {
+    await deleteCourse(id);
+    revalidatePath("/teacher/overview");
+    revalidatePath("/courses");
+    return { success: true };
+  } catch {
+    return { success: false, error: "Failed to delete course. Please try again." };
+  }
+}
+
+export async function deleteCategoryAction(authToken: string, id: number) {
+  if (!authToken || authToken.length !== 64) {
+    return { success: false, error: "Invalid authentication" };
+  }
+
+  try {
+    await deleteCategory(id);
+    revalidatePath("/teacher/overview");
+    revalidatePath("/categories");
+    return { success: true };
+  } catch {
+    return { success: false, error: "Failed to delete category. Please try again." };
+  }
+}
+
+export async function deleteProblemAction(authToken: string, id: number) {
+  if (!authToken || authToken.length !== 64) {
+    return { success: false, error: "Invalid authentication" };
+  }
+
+  try {
+    await deleteProblem(id);
+    revalidatePath("/teacher/overview");
+    revalidatePath("/categories");
+    return { success: true };
+  } catch {
+    return { success: false, error: "Failed to delete problem. Please try again." };
   }
 } 
