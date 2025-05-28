@@ -26,8 +26,8 @@ async function main() {
 }
 
 async function seedExamples() {
-   // Create examples
-   const example1 = await prisma.example.create({
+  // Create examples
+  const example1 = await prisma.example.create({
     data: {
       name: "Example 1",
       description: "This is the first example",
@@ -47,15 +47,15 @@ async function seedExamples() {
 async function seedCourses() {
   const course1 = await prisma.course.create({
     data: {
-      name: "Course 1",
-      description: "Introduction to Programming Fundamentals and Problem Solving",
+      name: "CNN",
+      description: "Convolutional Neural Networks: Deep learning for computer vision, image recognition, and spatial data processing",
     },
   });
 
   const course2 = await prisma.course.create({
     data: {
-      name: "Course 2",
-      description: "Advanced Programming Concepts and Data Structures",
+      name: "ANN",
+      description: "Artificial Neural Networks: Fundamentals of neural network architectures, backpropagation, and machine learning",
     },
   });
 
@@ -65,31 +65,46 @@ async function seedCourses() {
 }
 
 async function seedCategories(courses: any) {
-  const { course1} = courses
+  const { course1, course2 } = courses
 
-  // Create categories
+  // Create categories for CNN course
   const category1 = await prisma.category.create({
     data: {
-      name: "Category 1",
+      name: "Lecture 1: Introduction to Convolutional Layers",
       courseId: course1.id,
     },
   });
 
   const category2 = await prisma.category.create({
     data: {
-      name: "Category 2",
+      name: "Lecture 2: Pooling and Feature Maps",
       courseId: course1.id,
     },
   });
 
-  console.log("Created categories:", { category1, category2 });
-  
-  return { category1, category2 };
+  // Create categories for ANN course
+  const category3 = await prisma.category.create({
+    data: {
+      name: "Lecture 1: Neural Network Fundamentals",
+      courseId: course2.id,
+    },
+  });
+
+  const category4 = await prisma.category.create({
+    data: {
+      name: "Lecture 2: Backpropagation Algorithm",
+      courseId: course2.id,
+    },
+  });
+
+  console.log("Created categories:", { category1, category2, category3, category4 });
+
+  return { category1, category2, category3, category4 };
 }
 
 async function seedProblems(categories: any) {
-  const { category1, category2 } = categories;
-  
+  const { category1, category2, category3, category4 } = categories;
+
   // Create problems
   const problem1 = await prisma.problem.create({
     data: {
@@ -143,7 +158,7 @@ async function seedProblems(categories: any) {
       hint: "Look for lines that incorrectly handle edge cases, initialization, and comparison logic.",
     },
   });
-  
+
   const bubbleSortProblem = await prisma.problem.create({
     data: {
       name: "Bubble Sort",
@@ -177,8 +192,91 @@ async function seedProblems(categories: any) {
       hint: "Look for the line that compares adjacent elements to determine their order.",
     },
   });
-  
-  console.log("Created problems:", { problem1, problem2, bubbleSortProblem });
+
+  // Create problems for ANN course
+  const neuronProblem = await prisma.problem.create({
+    data: {
+      name: "Simple Neuron Implementation",
+      description: "Find the errors in this basic neuron implementation with weighted inputs and bias.",
+      categoryId: category3.id,
+      code_snippet: `import numpy as np
+
+def neuron_output(inputs, weights, bias):
+    # Calculate weighted sum
+    weighted_sum = 0
+    for i in range(len(inputs)):
+        weighted_sum -= inputs[i] * weights[i]
+    
+    # Add bias
+    weighted_sum + bias
+    
+    # Apply activation function (sigmoid)
+    output = 1 / (1 + np.exp(weighted_sum))
+    return output`,
+      correct_lines: "7,10,13",
+      reason: {
+        "7": "Error: Using subtraction (-=) instead of addition (+=). This subtracts the weighted inputs instead of adding them.",
+        "10": "Error: Missing assignment operator. Should be 'weighted_sum += bias' to actually add the bias to the sum.",
+        "13": "Error: Missing negative sign in exponential. Should be 'np.exp(-weighted_sum)' for correct sigmoid function."
+      },
+      hint: "Look for errors in the weighted sum calculation, bias addition, and sigmoid activation function.",
+    },
+  });
+
+  const backpropProblem = await prisma.problem.create({
+    data: {
+      name: "Gradient Descent Update",
+      description: "Identify the errors in this gradient descent weight update implementation.",
+      categoryId: category4.id,
+      code_snippet: `def update_weights(weights, gradients, learning_rate):
+    updated_weights = []
+    
+    for i in range(len(weights)):
+        # Update rule: w = w - learning_rate * gradient
+        new_weight = weights[i] + learning_rate * gradients[i]
+        updated_weights.append(new_weight)
+    
+    return updated_weights
+
+def calculate_loss_gradient(predicted, actual):
+    # Mean squared error gradient
+    gradient = 2 * (actual - predicted)
+    return gradient`,
+      correct_lines: "6,13",
+      reason: {
+        "6": "Error: Using addition (+) instead of subtraction (-). Gradient descent should subtract the gradient: w = w - learning_rate * gradient.",
+        "13": "Error: Incorrect gradient calculation. For MSE, gradient should be 2 * (predicted - actual), not (actual - predicted)."
+      },
+      hint: "Check the gradient descent update rule and the derivative of mean squared error loss function.",
+    },
+  });
+
+  const activationProblem = await prisma.problem.create({
+    data: {
+      name: "Activation Functions",
+      description: "Find the errors in these common neural network activation function implementations.",
+      categoryId: category3.id,
+      code_snippet: `import numpy as np
+
+def relu(x):
+    return np.minimum(0, x)
+
+def tanh(x):
+    return (np.exp(x) + np.exp(-x)) / (np.exp(x) - np.exp(-x))
+
+def softmax(x):
+    exp_x = np.exp(x)
+    return exp_x / np.sum(exp_x)`,
+      correct_lines: "4,7",
+      reason: {
+        "4": "Error: Using np.minimum instead of np.maximum. ReLU should return max(0, x), not min(0, x).",
+        "7": "Error: Incorrect tanh formula. Should be (exp(x) - exp(-x)) / (exp(x) + exp(-x)), with subtraction in numerator and addition in denominator."
+      },
+      hint: "Check the mathematical definitions of ReLU and tanh activation functions.",
+    },
+  });
+
+  console.log("Created problems:", { problem1, problem2, bubbleSortProblem, neuronProblem, backpropProblem, activationProblem });
 }
 
 main()
