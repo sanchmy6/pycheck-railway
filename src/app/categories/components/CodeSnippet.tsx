@@ -4,12 +4,16 @@ import React, { useEffect, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { evaluateProblemSelection, getProblemById } from "../actions";
+import { evaluateProblemSelection, getProblemById, getProblemHint } from "../actions";
 
 interface CodeSnippetProps {
   code: string;
   problemId: number;
   language?: string;
+  problemData?: {
+    correctLinesCount: number;
+    hint: string;
+  };
 }
 
 interface EvaluationResult {
@@ -23,7 +27,7 @@ interface EvaluationResult {
   message?: string;
 }
 
-export function CodeSnippet({ code, problemId, language = "python" }: CodeSnippetProps) {
+export function CodeSnippet({ code, problemId, language = "python", problemData }: CodeSnippetProps) {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [selectedLines, setSelectedLines] = useState<number[]>([]);
   const [evaluationResult, setEvaluationResult] = useState<EvaluationResult | null>(null);
@@ -32,7 +36,10 @@ export function CodeSnippet({ code, problemId, language = "python" }: CodeSnippe
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedback, setFeedback] = useState<EvaluationResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  const [showHint, setShowHint] = useState(false);
+  const [hint, setHint] = useState<string>("");
+  const [isLoadingHint, setIsLoadingHint] = useState(false);
+
   useEffect(() => {
     const theme = document.documentElement.getAttribute("data-theme");
     setIsDarkMode(theme === "dark");
@@ -52,19 +59,26 @@ export function CodeSnippet({ code, problemId, language = "python" }: CodeSnippe
   }, []);
 
   useEffect(() => {
-    const fetchProblemInfo = async () => {
-      const problemInfo = await getProblemById(problemId);
-      if (problemInfo) {
-        setExpectedLinesCount(problemInfo.correctLinesCount);
-      }
-    };
-    
-    fetchProblemInfo();
-  }, [problemId]);
+    if (problemData) {
+      // Use provided problem data
+      setExpectedLinesCount(problemData.correctLinesCount);
+      setHint(problemData.hint);
+    } else {
+      // Fallback to API call if no problem data provided
+      const fetchProblemInfo = async () => {
+        const problemInfo = await getProblemById(problemId);
+        if (problemInfo) {
+          setExpectedLinesCount(problemInfo.correctLinesCount);
+        }
+      };
+
+      fetchProblemInfo();
+    }
+  }, [problemId, problemData]);
 
   const handleLineClick = (lineNumber: number) => {
     if (hasSubmitted) return;
-    
+
     setSelectedLines(prev => {
       if (prev.includes(lineNumber)) {
         return prev.filter(line => line !== lineNumber);
@@ -76,7 +90,7 @@ export function CodeSnippet({ code, problemId, language = "python" }: CodeSnippe
   const handleSubmit = async () => {
     setIsSubmitting(true);
     setShowFeedback(false);
-    
+
     try {
       const result = await evaluateProblemSelection(problemId, selectedLines);
       setFeedback(result);
@@ -99,10 +113,36 @@ export function CodeSnippet({ code, problemId, language = "python" }: CodeSnippe
     setHasSubmitted(false);
   };
 
+  const handleHintClick = async () => {
+    if (showHint) {
+      setShowHint(false);
+      return;
+    }
+
+    if (problemData?.hint) {
+      setShowHint(true);
+    } else if (!hint) {
+      setIsLoadingHint(true);
+      try {
+        const hintData = await getProblemHint(problemId);
+        if (hintData?.hint) {
+          setHint(hintData.hint);
+        }
+      } catch (error) {
+        console.error("Failed to load hint:", error);
+      } finally {
+        setIsLoadingHint(false);
+      }
+      setShowHint(true);
+    } else {
+      setShowHint(true);
+    }
+  };
+
   const getLineBackgroundColor = (lineNumber: number) => {
     if (!hasSubmitted) {
-      return selectedLines.includes(lineNumber) 
-        ? (isDarkMode ? "#2d3748" : "#e2e8f0") 
+      return selectedLines.includes(lineNumber)
+        ? (isDarkMode ? "#2d3748" : "#e2e8f0")
         : "transparent";
     }
 
@@ -115,8 +155,8 @@ export function CodeSnippet({ code, problemId, language = "python" }: CodeSnippe
       return isDarkMode ? "#7f1d1d" : "#fef2f2";
     }
 
-    return selectedLines.includes(lineNumber) 
-      ? (isDarkMode ? "#065f46" : "#dcfce7") 
+    return selectedLines.includes(lineNumber)
+      ? (isDarkMode ? "#065f46" : "#dcfce7")
       : "transparent";
   };
 
@@ -156,7 +196,7 @@ export function CodeSnippet({ code, problemId, language = "python" }: CodeSnippe
           {code}
         </SyntaxHighlighter>
       </div>
-      
+
       <div className="mt-4 space-y-3">
         <div className="text-sm text-gray-600 dark:text-gray-400">
           {!hasSubmitted ? (
@@ -172,8 +212,16 @@ export function CodeSnippet({ code, problemId, language = "python" }: CodeSnippe
             <>Selected: {selectedLines.length} lines</>
           )}
         </div>
-        
+
         <div className="flex gap-2">
+          <button
+            onClick={handleHintClick}
+            disabled={isLoadingHint}
+            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoadingHint ? "Loading..." : showHint ? "Hide Hint" : "💡 Show Hint"}
+          </button>
+
           {!hasSubmitted ? (
             canSubmit ? (
               <button
@@ -206,7 +254,7 @@ export function CodeSnippet({ code, problemId, language = "python" }: CodeSnippe
               <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded dark:bg-green-900/30 dark:border-green-800 dark:text-green-400">
                 <div className="font-medium">Good Job!</div>
               </div>
-              
+
               {feedback.correctSelections && feedback.correctSelections.length > 0 && (
                 <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded dark:bg-green-900/20 dark:border-green-800 dark:text-green-300">
                   <div className="font-medium mb-2">Explanation:</div>
@@ -233,7 +281,7 @@ export function CodeSnippet({ code, problemId, language = "python" }: CodeSnippe
                   )}
                 </div>
               </div>
-              
+
               {feedback.correctSelections && feedback.correctSelections.length > 0 && (
                 <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded dark:bg-green-900/20 dark:border-green-800 dark:text-green-300">
                   <div className="font-medium mb-2">Correctly identified lines:</div>
@@ -248,6 +296,26 @@ export function CodeSnippet({ code, problemId, language = "python" }: CodeSnippe
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {showHint && (problemData?.hint || hint) && (
+        <div className="mt-4">
+          <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-300">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium">Hint</h3>
+                <div className="mt-1 text-sm">
+                  {problemData?.hint || hint}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
