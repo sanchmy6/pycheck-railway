@@ -45,7 +45,7 @@ export function TeacherOverviewClient({ initialCourses }: TeacherOverviewClientP
   } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
-  
+
   const router = useRouter();
 
   useEffect(() => {
@@ -60,9 +60,9 @@ export function TeacherOverviewClient({ initialCourses }: TeacherOverviewClientP
       router.push("/teacher");
       return;
     }
-    
+
     setIsAuthenticated(true);
-    
+
     if (coursesCache && coursesCache.length > 0) {
       setCourses(coursesCache);
     }
@@ -92,15 +92,15 @@ export function TeacherOverviewClient({ initialCourses }: TeacherOverviewClientP
 
   const handleDelete = async () => {
     if (!deleteConfirm) return;
-    
+
     setIsDeleting(true);
     setDeleteError("");
-    
+
     const authToken = sessionStorage.getItem("teacher_token") || "";
-    
+
     try {
       let result;
-      
+
       switch (deleteConfirm.type) {
         case "course":
           result = await deleteCourseAction(authToken, deleteConfirm.id);
@@ -112,7 +112,7 @@ export function TeacherOverviewClient({ initialCourses }: TeacherOverviewClientP
           result = await deleteProblemAction(authToken, deleteConfirm.id);
           break;
       }
-      
+
       if (result.success) {
         if (deleteConfirm.type === "course") {
           setCourses(prev => prev.filter(course => course.id !== deleteConfirm.id));
@@ -130,7 +130,7 @@ export function TeacherOverviewClient({ initialCourses }: TeacherOverviewClientP
             }))
           })));
         }
-        
+
         setDeleteConfirm(null);
       } else {
         setDeleteError(result.error || "Failed to delete item");
@@ -182,7 +182,7 @@ export function TeacherOverviewClient({ initialCourses }: TeacherOverviewClientP
               Manage your courses, categories, and problems • Click to expand
             </p>
           </div>
-          
+
           {coursesWithStats.length === 0 ? (
             <div className="px-6 py-8 text-center">
               <div className="text-gray-500 dark:text-gray-400 mb-4">
@@ -199,7 +199,7 @@ export function TeacherOverviewClient({ initialCourses }: TeacherOverviewClientP
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {coursesWithStats.map((course) => {
                 const isExpanded = expandedCourse === course.id;
-                
+
                 return (
                   <div key={course.id} className="px-6 py-4">
                     <div className="flex items-center justify-between">
@@ -209,10 +209,10 @@ export function TeacherOverviewClient({ initialCourses }: TeacherOverviewClientP
                             onClick={() => toggleCourse(course.id)}
                             className="flex items-center text-lg font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                           >
-                            <svg 
-                              className={`w-5 h-5 mr-2 transition-transform ${isExpanded ? "rotate-90" : ""}`} 
-                              fill="none" 
-                              stroke="currentColor" 
+                            <svg
+                              className={`w-5 h-5 mr-2 transition-transform ${isExpanded ? "rotate-90" : ""}`}
+                              fill="none"
+                              stroke="currentColor"
                               viewBox="0 0 24 24"
                             >
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
@@ -273,10 +273,10 @@ export function TeacherOverviewClient({ initialCourses }: TeacherOverviewClientP
                                     onClick={() => toggleCategory(category.id)}
                                     className="flex items-center text-md font-medium text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
                                   >
-                                    <svg 
-                                      className={`w-4 h-4 mr-2 transition-transform ${expandedCategory === category.id ? "rotate-90" : ""}`} 
-                                      fill="none" 
-                                      stroke="currentColor" 
+                                    <svg
+                                      className={`w-4 h-4 mr-2 transition-transform ${expandedCategory === category.id ? "rotate-90" : ""}`}
+                                      fill="none"
+                                      stroke="currentColor"
                                       viewBox="0 0 24 24"
                                     >
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
@@ -365,7 +365,7 @@ export function TeacherOverviewClient({ initialCourses }: TeacherOverviewClientP
           )}
         </div>
       </div>
-      
+
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
@@ -373,18 +373,18 @@ export function TeacherOverviewClient({ initialCourses }: TeacherOverviewClientP
               Confirm Delete
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-              Are you sure you want to delete the {deleteConfirm.type} "{deleteConfirm.name}"? 
+              Are you sure you want to delete the {deleteConfirm.type} &quot;{deleteConfirm.name}&quot;?
               {deleteConfirm.type === "course" && " This will also delete all categories and problems in this course."}
               {deleteConfirm.type === "category" && " This will also delete all problems in this category."}
               {" "}This action cannot be undone.
             </p>
-            
+
             {deleteError && (
               <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md">
                 <p className="text-sm text-red-600 dark:text-red-400">{deleteError}</p>
               </div>
             )}
-            
+
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => {
