@@ -1,6 +1,6 @@
 "use server";
 
-import { queryCategories, findCategoryById, queryProblemsByCategoryId, findProblemById, getCategoryWithCourse as getCategoryWithCourseFromDb } from "@/lib/db/db-helpers";
+import { queryCategories, findCategoryById, queryProblemsByCategoryId, findProblemById, findCategoryWithCourse } from "@/lib/db/db-helpers";
 
 export async function getCategories() {
   return await queryCategories();
@@ -10,12 +10,12 @@ export async function getCategoryById(id: string) {
   return await findCategoryById(parseInt(id));
 }
 
-export async function getCategoryWithCourse(id: string) {
-  return await getCategoryWithCourseFromDb(parseInt(id));
+export async function getProblemsByCategoryId(categoryId: string) {
+  return await queryProblemsByCategoryId(parseInt(categoryId));
 }
 
-export async function getProblemsByCategoryId(id: string) {
-  return await queryProblemsByCategoryId(parseInt(id));
+export async function getCategoryWithCourse(id: string) {
+  return await findCategoryWithCourse(parseInt(id));
 }
 
 export async function getProblemById(id: number) {

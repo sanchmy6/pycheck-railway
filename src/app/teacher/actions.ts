@@ -1,8 +1,23 @@
 "use server";
 
 import { verifyTeacherPassword, generateAuthToken } from "@/lib/auth";
-import { createProblem, queryCategories, queryCourses, queryCategoriesByCourseId, createCategory, createCourse, updateCourse, updateCategory, updateProblem, findCourseById, findCategoryById, findProblemById, getCoursesWithBasicStats, getCategoriesWithProblemsForCourse, getProblemWithCategoryAndCourse, getCategoryWithCourse, getCoursesWithCompleteData, deleteCourse, deleteCategory, deleteProblem } from "@/lib/db/db-helpers";
+import { createProblem, queryCategories, queryCourses, queryCategoriesByCourseId, createCategory, createCourse, updateCourse, updateCategory, updateProblem, findCourseById, findCategoryById, findProblemById, queryCoursesWithBasicStats, queryCategoriesWithProblemsForCourse, findProblemWithCategoryAndCourse, findCategoryWithCourse, queryCoursesWithCompleteData, deleteCourse, deleteCategory, deleteProblem } from "@/lib/db/db-helpers";
 import { revalidatePath } from "next/cache";
+
+// Utility functions for common validations and error handling
+function isValidAuthToken(authToken: string): boolean {
+  return !!authToken && authToken.length === 64;
+}
+
+function isUniqueConstraintError(error: unknown): boolean {
+  const err = error as { code?: string };
+  return err.code === "P2002";
+}
+
+function isForeignKeyConstraintError(error: unknown): boolean {
+  const err = error as { code?: string };
+  return err.code === "P2003";
+}
 
 export async function authenticateTeacher(password: string) {
   const isValid = verifyTeacherPassword(password);
@@ -20,7 +35,7 @@ export async function getCourses() {
 }
 
 export async function getCoursesWithStats() {
-  return await getCoursesWithCompleteData();
+  return await queryCoursesWithCompleteData();
 }
 
 export async function getCategories() {
@@ -32,7 +47,7 @@ export async function getCategoriesByCourse(courseId: number) {
 }
 
 export async function createCourseAction(authToken: string, name: string, description: string) {
-  if (!authToken || authToken.length !== 64) {
+  if (!isValidAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -40,8 +55,7 @@ export async function createCourseAction(authToken: string, name: string, descri
     const course = await createCourse({ name, description });
     return { success: true, course };
   } catch (error: unknown) {
-    const err = error as { code?: string };
-    if (err.code === "P2002") {
+    if (isUniqueConstraintError(error)) {
       return { success: false, error: "A course with this name already exists" };
     }
     return { success: false, error: "Failed to create course. Please try again." };
@@ -49,7 +63,7 @@ export async function createCourseAction(authToken: string, name: string, descri
 }
 
 export async function createCategoryAction(authToken: string, name: string, courseId: number) {
-  if (!authToken || authToken.length !== 64) {
+  if (!isValidAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -57,8 +71,7 @@ export async function createCategoryAction(authToken: string, name: string, cour
     const category = await createCategory({ name, courseId });
     return { success: true, category };
   } catch (error: unknown) {
-    const err = error as { code?: string };
-    if (err.code === "P2002") {
+    if (isUniqueConstraintError(error)) {
       return { success: false, error: "A category with this name already exists" };
     }
     return { success: false, error: "Failed to create category. Please try again." };
@@ -77,7 +90,7 @@ export async function createProblemAction(
     hint: string;
   }
 ) {
-  if (!authToken || authToken.length !== 64) {
+  if (!isValidAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -100,14 +113,14 @@ export async function createProblemAction(
     const err = error as { code?: string; meta?: { target?: string[] }; message?: string };
     console.error("Problem creation error:", err);
     
-    if (err.code === "P2002") {
+    if (isUniqueConstraintError(error)) {
       if (err.meta?.target?.includes("name")) {
         return { success: false, error: "A problem with this name already exists. Please choose a different name." };
       }
       return { success: false, error: "This problem conflicts with an existing entry. Please check your input." };
     }
     
-    if (err.code === "P2003") {
+    if (isForeignKeyConstraintError(error)) {
       return { success: false, error: "The selected category is invalid. Please select a valid category." };
     }
     
@@ -120,7 +133,7 @@ export async function createProblemAction(
 }
 
 export async function updateCourseAction(authToken: string, id: number, name: string, description: string) {
-  if (!authToken || authToken.length !== 64) {
+  if (!isValidAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -130,8 +143,7 @@ export async function updateCourseAction(authToken: string, id: number, name: st
     revalidatePath("/courses");
     return { success: true, course };
   } catch (error: unknown) {
-    const err = error as { code?: string };
-    if (err.code === "P2002") {
+    if (isUniqueConstraintError(error)) {
       return { success: false, error: "A course with this name already exists" };
     }
     return { success: false, error: "Failed to update course. Please try again." };
@@ -139,7 +151,7 @@ export async function updateCourseAction(authToken: string, id: number, name: st
 }
 
 export async function updateCategoryAction(authToken: string, id: number, name: string, courseId: number) {
-  if (!authToken || authToken.length !== 64) {
+  if (!isValidAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -149,11 +161,10 @@ export async function updateCategoryAction(authToken: string, id: number, name: 
     revalidatePath("/categories");
     return { success: true, category };
   } catch (error: unknown) {
-    const err = error as { code?: string };
-    if (err.code === "P2002") {
+    if (isUniqueConstraintError(error)) {
       return { success: false, error: "A category with this name already exists" };
     }
-    if (err.code === "P2003") {
+    if (isForeignKeyConstraintError(error)) {
       return { success: false, error: "The selected course is invalid" };
     }
     return { success: false, error: "Failed to update category. Please try again." };
@@ -173,7 +184,7 @@ export async function updateProblemAction(
     hint: string;
   }
 ) {
-  if (!authToken || authToken.length !== 64) {
+  if (!isValidAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -197,14 +208,14 @@ export async function updateProblemAction(
     const err = error as { code?: string; meta?: { target?: string[] }; message?: string };
     console.error("Problem update error:", err);
     
-    if (err.code === "P2002") {
+    if (isUniqueConstraintError(error)) {
       if (err.meta?.target?.includes("name")) {
         return { success: false, error: "A problem with this name already exists. Please choose a different name." };
       }
       return { success: false, error: "This problem conflicts with an existing entry. Please check your input." };
     }
     
-    if (err.code === "P2003") {
+    if (isForeignKeyConstraintError(error)) {
       return { success: false, error: "The selected category is invalid. Please select a valid category." };
     }
     
@@ -217,7 +228,7 @@ export async function updateProblemAction(
 }
 
 export async function getCourseById(authToken: string, id: number) {
-  if (!authToken || authToken.length !== 64) {
+  if (!isValidAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -230,7 +241,7 @@ export async function getCourseById(authToken: string, id: number) {
 }
 
 export async function getCategoryById(authToken: string, id: number) {
-  if (!authToken || authToken.length !== 64) {
+  if (!isValidAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -243,7 +254,7 @@ export async function getCategoryById(authToken: string, id: number) {
 }
 
 export async function getProblemById(authToken: string, id: number) {
-  if (!authToken || authToken.length !== 64) {
+  if (!isValidAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -257,16 +268,16 @@ export async function getProblemById(authToken: string, id: number) {
 
 // Optimized functions for better performance
 export async function getCoursesBasic() {
-  return await getCoursesWithBasicStats();
+  return await queryCoursesWithBasicStats();
 }
 
 export async function getCategoriesWithProblemsForCourseAction(authToken: string, courseId: number) {
-  if (!authToken || authToken.length !== 64) {
+  if (!isValidAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
   try {
-    const categories = await getCategoriesWithProblemsForCourse(courseId);
+    const categories = await queryCategoriesWithProblemsForCourse(courseId);
     return { success: true, categories };
   } catch {
     return { success: false, error: "Failed to fetch categories" };
@@ -274,12 +285,12 @@ export async function getCategoriesWithProblemsForCourseAction(authToken: string
 }
 
 export async function getProblemByIdOptimized(authToken: string, id: number) {
-  if (!authToken || authToken.length !== 64) {
+  if (!isValidAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
   try {
-    const problem = await getProblemWithCategoryAndCourse(id);
+    const problem = await findProblemWithCategoryAndCourse(id);
     return { success: true, problem };
   } catch {
     return { success: false, error: "Failed to fetch problem" };
@@ -287,12 +298,12 @@ export async function getProblemByIdOptimized(authToken: string, id: number) {
 }
 
 export async function getCategoryByIdOptimized(authToken: string, id: number) {
-  if (!authToken || authToken.length !== 64) {
+  if (!isValidAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
   try {
-    const category = await getCategoryWithCourse(id);
+    const category = await findCategoryWithCourse(id);
     return { success: true, category };
   } catch {
     return { success: false, error: "Failed to fetch category" };
@@ -301,7 +312,7 @@ export async function getCategoryByIdOptimized(authToken: string, id: number) {
 
 // Delete
 export async function deleteCourseAction(authToken: string, id: number) {
-  if (!authToken || authToken.length !== 64) {
+  if (!isValidAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -316,7 +327,7 @@ export async function deleteCourseAction(authToken: string, id: number) {
 }
 
 export async function deleteCategoryAction(authToken: string, id: number) {
-  if (!authToken || authToken.length !== 64) {
+  if (!isValidAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -331,7 +342,7 @@ export async function deleteCategoryAction(authToken: string, id: number) {
 }
 
 export async function deleteProblemAction(authToken: string, id: number) {
-  if (!authToken || authToken.length !== 64) {
+  if (!isValidAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
