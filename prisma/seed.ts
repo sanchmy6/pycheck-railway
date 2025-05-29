@@ -6,12 +6,9 @@ async function main() {
   // Delete existing data first
   await prisma.problem.deleteMany();
   await prisma.category.deleteMany();
-  await prisma.example.deleteMany();
+  await prisma.course.deleteMany();
 
   console.log("Seeding database...");
-
-  // Create examples
-  await seedExamples();
 
   // Create courses
   const courses = await seedCourses();
@@ -23,25 +20,6 @@ async function main() {
   await seedProblems(categories);
 
   console.log("Database seeded successfully");
-}
-
-async function seedExamples() {
-  // Create examples
-  const example1 = await prisma.example.create({
-    data: {
-      name: "Example 1",
-      description: "This is the first example",
-    },
-  });
-
-  const example2 = await prisma.example.create({
-    data: {
-      name: "Example 2",
-      description: "This is the second example",
-    },
-  });
-
-  console.log("Created examples:", { example1, example2 });
 }
 
 async function seedCourses() {
