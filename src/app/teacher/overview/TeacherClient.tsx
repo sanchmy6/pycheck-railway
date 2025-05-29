@@ -33,7 +33,7 @@ interface TeacherOverviewClientProps {
 
 let coursesCache: Course[] | null = null;
 
-export function TeacherOverviewClient({ initialCourses }: TeacherOverviewClientProps) {
+export function TeacherClient({ initialCourses }: TeacherOverviewClientProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [courses, setCourses] = useState<Course[]>(initialCourses);
   const [expandedCourse, setExpandedCourse] = useState<number | null>(null);

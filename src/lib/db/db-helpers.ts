@@ -1,25 +1,5 @@
 import { prisma } from '@/prisma';
 
-// Optimize connection settings for faster initial queries
-const optimizedPrisma = prisma.$extends({
-  query: {
-    $allModels: {
-      async $allOperations({ operation, model, args, query }) {
-        const start = Date.now();
-        const result = await query(args);
-        const end = Date.now();
-        
-        // Log slow queries in development
-        if (process.env.NODE_ENV === 'development' && (end - start) > 100) {
-          console.log(`Slow query: ${model}.${operation} took ${end - start}ms`);
-        }
-        
-        return result;
-      },
-    },
-  },
-});
-
 // Warm up database connection to eliminate first-query delays
 let isWarmedUp = false;
 export async function warmUpConnection() {
@@ -27,7 +7,7 @@ export async function warmUpConnection() {
   
   try {
     // Execute a lightweight query to establish connection
-    await optimizedPrisma.$queryRaw`SELECT 1`;
+    await prisma.$queryRaw`SELECT 1`;
     isWarmedUp = true;
     console.log('Database connection warmed up');
   } catch (error) {
@@ -40,57 +20,34 @@ if (typeof window === 'undefined') { // Server-side only
   warmUpConnection();
 }
 
-// Example helpers
-export async function findExampleById(id: number) {
-  return await optimizedPrisma.example.findUnique({
-    where: { id },
-  });
-}
-
-export async function findExampleByName(name: string) {
-  return await optimizedPrisma.example.findUnique({
-    where: { name },
-  });
-}
-
-export async function createExample(data: { name: string; description: string }) {
-  return await optimizedPrisma.example.create({
-    data,
-  });
-}
-
-export async function queryExamples() {
-  return await optimizedPrisma.example.findMany();
-}
-
 // Course helpers
 export async function findCourseById(id: number) {
-  return await optimizedPrisma.course.findUnique({
+  return await prisma.course.findUnique({
     where: { id },
   });
 }
 
 export async function createCourse(data: { name: string; description: string }) {
-  return await optimizedPrisma.course.create({
+  return await prisma.course.create({
     data,
   });
 }
 
 export async function updateCourse(id: number, data: { name: string; description: string }) {
-  return await optimizedPrisma.course.update({
+  return await prisma.course.update({
     where: { id },
     data,
   });
 }
 
 export async function queryCourses() {
-  return await optimizedPrisma.course.findMany({
-    orderBy: { name: 'asc' },
+  return await prisma.course.findMany({
+    orderBy: { name: "asc" },
   });
 }
 
-export async function getCoursesWithStats() {
-  return await optimizedPrisma.course.findMany({
+export async function queryCoursesWithStats() {
+  return await prisma.course.findMany({
     include: {
       _count: {
         select: {
@@ -117,8 +74,8 @@ export async function getCoursesWithStats() {
   });
 }
 
-export async function getCoursesWithBasicStats() {
-  return await optimizedPrisma.course.findMany({
+export async function queryCoursesWithBasicStats() {
+  return await prisma.course.findMany({
     include: {
       _count: {
         select: {
@@ -127,13 +84,13 @@ export async function getCoursesWithBasicStats() {
       },
     },
     orderBy: {
-      name: 'asc'
+      name: "asc"
     }
   });
 }
 
-export async function getCoursesWithCompleteData() {
-  return await optimizedPrisma.course.findMany({
+export async function queryCoursesWithCompleteData() {
+  return await prisma.course.findMany({
     include: {
       _count: {
         select: {
@@ -154,56 +111,56 @@ export async function getCoursesWithCompleteData() {
               description: true,
             },
             orderBy: {
-              name: 'asc'
+              name: "asc"
             }
           },
         },
         orderBy: {
-          name: 'asc'
+          name: "asc"
         }
       },
     },
     orderBy: {
-      name: 'asc'
+      name: "asc"
     }
   });
 }
 
 // Category helpers
 export async function findCategoryById(id: number) {
-  return await optimizedPrisma.category.findUnique({
+  return await prisma.category.findUnique({
     where: { id },
   });
 }
 
 export async function createCategory(data: { name: string; courseId: number }) {
-  return await optimizedPrisma.category.create({
+  return await prisma.category.create({
     data,
   });
 }
 
 export async function updateCategory(id: number, data: { name: string; courseId: number }) {
-  return await optimizedPrisma.category.update({
+  return await prisma.category.update({
     where: { id },
     data,
   });
 }
 
 export async function queryCategories() {
-  return await optimizedPrisma.category.findMany({
-    orderBy: { name: 'asc' },
+  return await prisma.category.findMany({
+    orderBy: { name: "asc" },
   });
 }
 
 export async function queryCategoriesByCourseId(courseId: number) {
-  return await optimizedPrisma.category.findMany({
+  return await prisma.category.findMany({
     where: { courseId },
-    orderBy: { name: 'asc' },
+    orderBy: { name: "asc" },
   });
 }
 
-export async function getCategoriesWithProblemsForCourse(courseId: number) {
-  return await optimizedPrisma.category.findMany({
+export async function queryCategoriesWithProblemsForCourse(courseId: number) {
+  return await prisma.category.findMany({
     where: { courseId },
     include: {
       _count: {
@@ -218,18 +175,18 @@ export async function getCategoriesWithProblemsForCourse(courseId: number) {
           description: true,
         },
         orderBy: {
-          name: 'asc'
+          name: "asc"
         }
       },
     },
     orderBy: {
-      name: 'asc'
+      name: "asc"
     }
   });
 }
 
 export async function findProblemById(id: number) {
-  return await optimizedPrisma.problem.findUnique({
+  return await prisma.problem.findUnique({
     where: { id },
   });
 }
@@ -243,7 +200,7 @@ export async function createProblem(data: {
   reason: Record<string, string>; 
   hint: string 
 }) {
-  return await optimizedPrisma.problem.create({
+  return await prisma.problem.create({
     data,
   });
 }
@@ -257,27 +214,27 @@ export async function updateProblem(id: number, data: {
   reason: Record<string, string>; 
   hint: string 
 }) {
-  return await optimizedPrisma.problem.update({
+  return await prisma.problem.update({
     where: { id },
     data,
   });
 }
 
 export async function queryProblems() {
-  return await optimizedPrisma.problem.findMany({
-    orderBy: { name: 'asc' },
+  return await prisma.problem.findMany({
+    orderBy: { name: "asc" },
   });
 }
 
 export async function queryProblemsByCategoryId(categoryId: number) {
-  return await optimizedPrisma.problem.findMany({
+  return await prisma.problem.findMany({
     where: { categoryId },
-    orderBy: { name: 'asc' },
+    orderBy: { name: "asc" },
   });
 }
 
-export async function getProblemWithCategoryAndCourse(problemId: number) {
-  return await optimizedPrisma.problem.findUnique({
+export async function findProblemWithCategoryAndCourse(problemId: number) {
+  return await prisma.problem.findUnique({
     where: { id: problemId },
     include: {
       category: {
@@ -295,8 +252,8 @@ export async function getProblemWithCategoryAndCourse(problemId: number) {
   });
 }
 
-export async function getCategoryWithCourse(categoryId: number) {
-  return await optimizedPrisma.category.findUnique({
+export async function findCategoryWithCourse(categoryId: number) {
+  return await prisma.category.findUnique({
     where: { id: categoryId },
     include: {
       course: {
@@ -312,19 +269,19 @@ export async function getCategoryWithCourse(categoryId: number) {
 
 // Delete helpers
 export async function deleteCourse(id: number) {
-  return await optimizedPrisma.course.delete({
+  return await prisma.course.delete({
     where: { id },
   });
 }
 
 export async function deleteCategory(id: number) {
-  return await optimizedPrisma.category.delete({
+  return await prisma.category.delete({
     where: { id },
   });
 }
 
 export async function deleteProblem(id: number) {
-  return await optimizedPrisma.problem.delete({
+  return await prisma.problem.delete({
     where: { id },
   });
 }

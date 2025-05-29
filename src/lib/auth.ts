@@ -1,7 +1,7 @@
 import crypto from "crypto";
 
 const TEACHER_KEY = process.env.TEACHER_KEY || "";
-const SECRET_KEY = process.env.SECRET_KEY || "default-secret-key";
+const SECRET_KEY = process.env.SECRET_KEY || "unsecure-secret-key";
 
 export function hashPassword(password: string): string {
   return crypto.createHmac("sha256", SECRET_KEY).update(password).digest("hex");
