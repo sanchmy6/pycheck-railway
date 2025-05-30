@@ -1,5 +1,5 @@
 import { getCategoryById, getProblemsByCategoryId, getCategoryWithCourse } from "../actions";
-import { CodeSnippet } from "../components/CodeSnippet";
+import { CodeSnippet } from "@/app/courses/components/CodeSnippet";
 import { BackButton } from "@/components/BackButton";
 
 export const dynamic = "force-dynamic";

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { evaluateProblemSelection, getProblemById, getProblemHint } from "../actions";
+import { evaluateProblemSelection, getProblemById, getProblemHint } from "../../categories/actions";
 
 interface CodeSnippetProps {
   code: string;
