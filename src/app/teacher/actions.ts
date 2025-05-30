@@ -3,21 +3,8 @@
 import { verifyTeacherPassword, generateAuthToken } from "@/lib/auth";
 import { createProblem, queryCategories, queryCourses, queryCategoriesByCourseId, createCategory, createCourse, updateCourse, updateCategory, updateProblem, findCourseById, findCategoryById, findProblemById, queryCoursesWithBasicStats, queryCategoriesWithProblemsForCourse, findProblemWithCategoryAndCourse, findCategoryWithCourse, queryCoursesWithCompleteData, deleteCourse, deleteCategory, deleteProblem } from "@/lib/db/db-helpers";
 import { revalidatePath } from "next/cache";
-
-// Utility functions for common validations and error handling
-function isValidAuthToken(authToken: string): boolean {
-  return !!authToken && authToken.length === 64;
-}
-
-function isUniqueConstraintError(error: unknown): boolean {
-  const err = error as { code?: string };
-  return err.code === "P2002";
-}
-
-function isForeignKeyConstraintError(error: unknown): boolean {
-  const err = error as { code?: string };
-  return err.code === "P2003";
-}
+import { importProblems } from "./import-actions";
+import { isValidAuthToken, isUniqueConstraintError, isForeignKeyConstraintError } from "./utils";
 
 export async function authenticateTeacher(password: string) {
   const isValid = verifyTeacherPassword(password);
@@ -354,4 +341,6 @@ export async function deleteProblemAction(authToken: string, id: number) {
   } catch {
     return { success: false, error: "Failed to delete problem. Please try again." };
   }
-} 
+}
+
+export { importProblems }; 
