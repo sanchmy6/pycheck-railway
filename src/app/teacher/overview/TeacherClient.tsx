@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { BackButton } from "@/components/BackButton";
-import { deleteCourseAction, deleteCategoryAction, deleteProblemAction } from "../actions";
+import { deleteCourseAction, deleteCategoryAction, deleteProblemAction, importProblems, getCoursesWithStats } from "../actions";
 
 interface Course {
   id: number;
@@ -27,13 +27,13 @@ interface Course {
   }>;
 }
 
-interface TeacherOverviewClientProps {
+interface TeacherClientProps {
   initialCourses: Course[];
 }
 
 let coursesCache: Course[] | null = null;
 
-export function TeacherClient({ initialCourses }: TeacherOverviewClientProps) {
+export function TeacherClient({ initialCourses }: TeacherClientProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [courses, setCourses] = useState<Course[]>(initialCourses);
   const [expandedCourse, setExpandedCourse] = useState<number | null>(null);
@@ -45,6 +45,19 @@ export function TeacherClient({ initialCourses }: TeacherOverviewClientProps) {
   } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [isImporting, setIsImporting] = useState(false);
+  const [importResult, setImportResult] = useState<{
+    success: boolean;
+    error?: string;
+    details?: {
+      imported: number;
+      updated: number;
+      skipped: number;
+      errors: string[];
+      coursesCreated: number;
+      categoriesCreated: number;
+    };
+  } | null>(null);
 
   const router = useRouter();
 
@@ -142,6 +155,32 @@ export function TeacherClient({ initialCourses }: TeacherOverviewClientProps) {
     }
   };
 
+  const handleImport = async () => {
+    setIsImporting(true);
+    setImportResult(null);
+
+    const authToken = sessionStorage.getItem("teacher_token") || "";
+
+    try {
+      const result = await importProblems(authToken);
+      setImportResult(result);
+      
+      if (result.success) {
+        const freshCourses = await getCoursesWithStats();
+        setCourses(freshCourses);
+        coursesCache = freshCourses;
+      }
+    } catch (error) { 
+      const err = error as Error;
+      setImportResult({
+        success: false,
+        error: `Import failed: ${err.message || 'Unknown error'}`
+      });
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -166,6 +205,13 @@ export function TeacherClient({ initialCourses }: TeacherOverviewClientProps) {
             >
               Create New Problem
             </Link>
+            <button
+              onClick={handleImport}
+              disabled={isImporting}
+              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isImporting ? "Importing..." : "Import from Sheet"}
+            </button>
             <button
               onClick={handleLogout}
               className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
@@ -403,6 +449,149 @@ export function TeacherClient({ initialCourses }: TeacherOverviewClientProps) {
               >
                 {isDeleting ? "Deleting..." : "Confirm"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {importResult && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3">
+                {importResult.success ? (
+                  <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                ) : (
+                  <div className="flex-shrink-0 w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
+                )}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {importResult.success ? 'Import Successful' : 'Import Failed'}
+                  </h3>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 max-h-[60vh] overflow-y-auto">
+              {importResult.success ? (
+                <div className="space-y-4">
+                  {importResult.details && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 text-center">
+                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                          {importResult.details.imported}
+                        </div>
+                        <div className="text-xs text-green-600 dark:text-green-400 font-medium">
+                          New Problems
+                        </div>
+                      </div>
+
+                      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 text-center">
+                        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                          {importResult.details.updated}
+                        </div>
+                        <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                          Updated Problems
+                        </div>
+                      </div>
+
+                      <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 text-center">
+                        <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                          {importResult.details.skipped}
+                        </div>
+                        <div className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">
+                          Rows Skipped
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-3 text-center">
+                        <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
+                          {(importResult.details.imported || 0) + (importResult.details.updated || 0) + (importResult.details.skipped || 0)}
+                        </div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                          Total Rows
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {importResult.details && (importResult.details.coursesCreated > 0 || importResult.details.categoriesCreated > 0) && (
+                    <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
+                      <h4 className="text-sm font-medium text-purple-800 dark:text-purple-200 mb-2 flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Created:
+                      </h4>
+                      <div className="text-sm text-purple-700 dark:text-purple-300 space-y-1">
+                        {importResult.details.coursesCreated > 0 && (
+                          <div className="flex justify-between">
+                            <span>Courses:</span>
+                            <span className="font-medium">{importResult.details.coursesCreated}</span>
+                          </div>
+                        )}
+                        {importResult.details.categoriesCreated > 0 && (
+                          <div className="flex justify-between">
+                            <span>Categories:</span>
+                            <span className="font-medium">{importResult.details.categoriesCreated}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {importResult.details && importResult.details.errors.length > 0 && (
+                    <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
+                      <h4 className="text-sm font-medium text-red-800 dark:text-red-200 mb-2 flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        Errors ({importResult.details.errors.length})
+                      </h4>
+                      <div className="max-h-32 overflow-y-auto">
+                        <ul className="space-y-1 text-sm text-red-700 dark:text-red-300">
+                          {importResult.details.errors.map((error, index) => (
+                            <li key={index} className="flex items-start gap-2">
+                              <span className="text-red-400 mt-0.5">•</span>
+                              <span>{error}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
+                    <p className="text-sm text-red-700 dark:text-red-300 flex items-center gap-2 justify-center">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                      {importResult.error}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setImportResult(null)}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-md transition-colors"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
