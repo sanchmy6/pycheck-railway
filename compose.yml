@@ -4,8 +4,6 @@ services:
   mysql_db:
     image: mysql:8.3
     container_name: mysql_db
-    # tmpfs:
-    #   - /var/lib/mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -26,37 +24,6 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
 
-  # db_init:
-  #   image: mysql:8.3
-  #   container_name: db_init
-  #   environment:
-  #     MYSQL_USER: ${MYSQL_USER}
-  #   depends_on:
-  #     mysql_db:
-  #       condition: service_healthy
-  #   command:
-  #     sh -c "mysql -h mysql_db -u root -p${MYSQL_ROOT_PASSWORD} < /init/init.sql"
-  #   volumes:
-  #     - ./init.sql:/init/init.sql
-  #   networks:
-  #     - app-network
-
-  # prisma:
-  #   image: node:18-alpine
-  #   container_name: prisma
-  #   depends_on:
-  #     mysql_db:
-  #       condition: service_healthy
-  #   working_dir: /app
-  #   volumes:
-  #     - .:/app
-  #   environment:
-  #     DATABASE_URL: mysql://root:password@mysql_db:3306/pychecker
-  #   command: >
-  #     sh -c "npm install && npx prisma generate && npx prisma migrate deploy"
-  #   # networks:
-  #   #   - app-network
-
   web:
     build:
       context: .
@@ -65,11 +32,14 @@ services:
     container_name: next_web
     ports:
       - '3000:3000'
+    develop:
+      watch:
+        - action: rebuild
+          path: src/
+          target: .
     depends_on:
       mysql_db:
         condition: service_healthy
-      # db_init:
-      #   condition: service_completed_successfully
     env_file:
       - .env
     networks:

@@ -58,8 +58,9 @@ docker compose down --remove-orphans
 ```
 - Then start the container as usual (step 3)
 
-## 6. Enable watch
+## 6. Enable watch(optional)
 - Watch allows automatic rebuilds upon changing your source code
+- Alternatively, you can just restart your setup using Step 5 and then Step 3.
 - open a different console and use this command:
 ```bash
 docker compose watch
