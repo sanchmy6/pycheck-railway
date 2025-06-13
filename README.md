@@ -1,11 +1,69 @@
 PyCheck
 
-## Description
+# Description
 
-## System requirements
+# System requirements
 
 - Node
 - MySQL
+- Docker (with Docker compose)
+
+# Launch with Docker:
+
+## 1. Configuration
+
+- Copy the configuration template:
+
+```bash
+cp .env.template .env
+```
+
+## 2. Run Docker
+
+- Use this command every time you need to start your containers
+- Don't forget to run it from the main folder of your app
+
+```bash
+docker compose up --build
+```
+
+## 3. Edit database
+
+- Using your Docker Desktop client, go into the database container, tab "exec"
+
+```bash
+mysql -h 127.0.0.1 -u root -proot #the spaces are right already
+```
+
+- In the mysql console that appears:
+
+```bash
+GRANT ALL PRIVILEGES ON *.* TO username@'%' WITH GRANT OPTION; #these privileges are necessary to create a prisma shadow DB
+FLUSH PRIVILEGES;
+```
+
+## 4. Restart Docker
+
+- First, use Ctrl+C to stop the docker compose up process.
+- Again, use this command every time you need to stop the container
+
+```bash
+docker compose down --remove-orphans
+```
+
+- Then start the container as usual (step 3)
+
+## 5. Enable watch(optional)
+
+- Watch allows automatic rebuilds upon changing your source code
+- Alternatively, you can just restart your setup using Step 4 and then Step 2.
+- open a different console and use this command:
+
+```bash
+docker compose watch
+```
+
+# Local launch:
 
 ## 1. Configuration
 
