@@ -42,7 +42,7 @@ export async function updateCourse(id: number, data: { name: string; description
 
 export async function queryCourses() {
   return await prisma.course.findMany({
-    orderBy: { name: "asc" },
+    orderBy: { id: "asc" },
   });
 }
 

@@ -6,21 +6,6 @@ import { revalidatePath } from "next/cache";
 import { importProblems } from "./import-actions";
 import { isValidAuthToken, isUniqueConstraintError, isForeignKeyConstraintError } from "./utils";
 
-// Utility functions for common validations and error handling
-function isValidAuthToken(authToken: string): boolean {
-  return !!authToken && authToken.length === 64;
-}
-
-function isUniqueConstraintError(error: unknown): boolean {
-  const err = error as { code?: string };
-  return err.code === "P2002";
-}
-
-function isForeignKeyConstraintError(error: unknown): boolean {
-  const err = error as { code?: string };
-  return err.code === "P2003";
-}
-
 export async function authenticateTeacher(password: string) {
   const isValid = verifyTeacherPassword(password);
   

@@ -271,7 +271,6 @@ export function CodeSnippet({ code, problemId, language = "python", problemData 
           ) : (
             <div className="space-y-4">
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded dark:bg-red-900/30 dark:border-red-800 dark:text-red-400">
-                <div className="font-medium">That is not quite right. Let&apos;s review:</div>
                 <div className="text-sm mt-1">
                   You found {feedback.correctSelectionsCount} of {feedback.expectedLinesCount} correct lines.
                   {(feedback.missingLinesCount && feedback.missingLinesCount > 0) && (

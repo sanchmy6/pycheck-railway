@@ -30,14 +30,13 @@ export function CourseClientPage({ course, categoriesWithProblems }: CourseClien
     return (
         <div className="min-h-screen dark:bg-gray-900 text-gray-900 dark:text-white">
             <div className="container mx-auto px-4 py-6">
-                <BackButton href="/courses" label="← Back to Courses" />
+                <BackButton href="/" label="Back to Home" />
 
                 <h1 className="text-3xl font-bold mt-4">{course.name}</h1>
                 <p className="text-gray-600 dark:text-gray-400 mb-8">{course.description}</p>
 
-                <div className="flex">
-                    {/* Sidebar */}
-                    <aside className="w-64 sticky top-20 h-full pr-6 space-y-4">
+                <div className="flex gap-8">
+                    <aside className="w-80 lg:w-96 xl:w-[28rem] 2xl:w-[32rem] sticky top-20 h-full space-y-4 flex-shrink-0">
                         {categoriesWithProblems.map((category) => (
                             <details
                                 key={category.id}
@@ -70,8 +69,7 @@ export function CourseClientPage({ course, categoriesWithProblems }: CourseClien
                         ))}
                     </aside>
 
-                    {/* Main content */}
-                    <section className="flex-1 space-y-6">
+                    <section className="flex-1 space-y-6 min-w-0">
                         {activeCategory && (
                             <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 dark:bg-yellow-900 dark:border-yellow-400 dark:text-yellow-100 rounded-md mb-6">
                                 <strong>Important:</strong> The errors you are looking for are <strong>logical or conceptual errors</strong>, not syntax errors.
