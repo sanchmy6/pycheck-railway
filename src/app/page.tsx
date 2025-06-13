@@ -7,12 +7,11 @@ export default async function Home() {
   const courses = await getCourses();
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-200 dark:from-gray-900 dark:via-blue-900 dark:to-slate-800">
-      <div className="absolute inset-0 bg-gradient-to-tl from-transparent via-white/40 to-blue-200/50 dark:from-transparent dark:via-blue-800/30 dark:to-slate-700/40"></div>
+    <div className="min-h-[calc(100vh-4rem)] bg-gray-50 dark:bg-gray-900">
       <div className="relative">
         <main className="container mx-auto px-4 py-12">
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            <div className="grid grid-cols-1 gap-8 mb-12">
               {courses.map((course) => (
                 <Link 
                   key={course.id}
