@@ -43,7 +43,7 @@ export default async function Home() {
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-3">
-                          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                          <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
                             <svg 
                               className="w-6 h-6 text-white" 
                               fill="none" 
@@ -90,7 +90,7 @@ export default async function Home() {
                     )}
                   </div>
                   
-                  <div className="h-1 bg-gradient-to-r from-blue-500 to-indigo-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                  <div className="h-1 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                 </Link>
               ))}
             </div>
@@ -99,7 +99,7 @@ export default async function Home() {
           {courses.length === 0 && (
             <div className="text-center py-20">
               <div className="max-w-md mx-auto">
-                <div className="w-32 h-32 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-full flex items-center justify-center mx-auto mb-8">
+                <div className="w-32 h-32 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-8">
                   <svg 
                     className="w-16 h-16 text-blue-500 dark:text-blue-400" 
                     fill="none" 

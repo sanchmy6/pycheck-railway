@@ -1,5 +1,4 @@
-import { getCategoriesByCourseId, getCourseById } from "../actions";
-import { getProblemsByCategoryId } from "@/app/categories/actions";
+import { getCategoriesByCourseId, getCourseById, getProblemsByCategoryId } from "../actions";
 import { CourseClientPage } from "./CourseClientPage";
 
 export const dynamic = "force-dynamic";
