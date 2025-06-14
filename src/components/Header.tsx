@@ -30,12 +30,26 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
+    <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="text-2xl font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-              PyCheck
+            <Link 
+              href="/" 
+              className="group relative"
+            >
+              <div className="relative">
+                {/* Animated background glow */}
+                <div className="absolute -inset-2 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-cyan-500/20 rounded-lg blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 animate-pulse"></div>
+                
+                {/* Main logo */}
+                <div className="relative flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 group-hover:scale-105">
+                  {/* Logo Text */}
+                  <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 dark:from-blue-400 dark:via-purple-400 dark:to-cyan-400 bg-clip-text text-transparent group-hover:from-blue-500 group-hover:via-purple-500 group-hover:to-cyan-500 dark:group-hover:from-blue-300 dark:group-hover:via-purple-300 dark:group-hover:to-cyan-300 transition-all duration-300">
+                    PyCheck
+                  </span>
+                </div>
+              </div>
             </Link>
           </div>
           
