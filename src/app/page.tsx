@@ -23,7 +23,7 @@ export default async function Home() {
               </div>
               
               <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed animate-fade-in-delay">
-                Train and exercise with <span className="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">Python example challenges</span> to get familiar with exam-style tasks.
+                Train and exercise with Python example challenges to get familiar with exam-style tasks.
               </p>
             </div>
           </div>
