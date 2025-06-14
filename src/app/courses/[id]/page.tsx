@@ -9,25 +9,24 @@ interface PageProps {
     params: Promise<{ id: string }>;
 }
 
-// Loading component for the course content
 function CourseLoading() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
             <div className="container mx-auto px-4 py-6">
                 <div className="animate-pulse">
-                    {/* Back button skeleton */}
+                    {/* Back button */}
                     <div className="mb-6">
                         <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
                     </div>
                     
-                    {/* Header skeleton */}
+                    {/* Header */}
                     <div className="mb-8">
                         <div className="h-12 w-96 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-lg mb-3"></div>
                         <div className="h-6 w-full max-w-3xl bg-gray-200 dark:bg-gray-700 rounded"></div>
                     </div>
                     
                     <div className="flex gap-8">
-                        {/* Sidebar skeleton */}
+                        {/* Sidebar */}
                         <aside className="w-80 lg:w-96 xl:w-[28rem] 2xl:w-[32rem] space-y-3">
                             {[1, 2, 3].map((i) => (
                                 <div key={i} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-lg p-5">
@@ -41,7 +40,7 @@ function CourseLoading() {
                             ))}
                         </aside>
                         
-                        {/* Main content skeleton */}
+                        {/* Main content */}
                         <section className="flex-1 space-y-6">
                             <div className="bg-amber-50/70 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-700/40 rounded-xl p-4">
                                 <div className="h-4 w-full bg-amber-200 dark:bg-amber-800 rounded"></div>
@@ -71,13 +70,11 @@ function CourseLoading() {
     );
 }
 
-// Error component for course not found
 function CourseNotFound() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
             <div className="text-center max-w-md mx-auto px-4">
                 <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-gray-200/50 dark:border-gray-700/50">
-                    {/* Error icon */}
                     <svg 
                         className="w-20 h-20 mx-auto mb-6 text-red-400 dark:text-red-500" 
                         fill="none" 
@@ -121,7 +118,6 @@ function CourseNotFound() {
     );
 }
 
-// Main course content component
 async function CourseContent({ id }: { id: string }) {
     try {
         const [course, categories] = await Promise.all([
@@ -147,7 +143,7 @@ async function CourseContent({ id }: { id: string }) {
             />
         );
     } catch (error) {
-        console.error('Error loading course:', error);
+        console.error("Error loading course:", error);
         return <CourseNotFound />;
     }
 }
