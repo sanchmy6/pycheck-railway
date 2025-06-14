@@ -116,11 +116,11 @@ export default async function Home() {
                 </div>
                 <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Getting Ready for Launch!</h3>
                 <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-                  Our interactive programming courses are being prepared. Soon you'll be able to master 
+                  Our interactive programming courses are being prepared. Soon you&apos;ll be able to master 
                   Python concepts through hands-on coding exercises and real-time feedback.
                 </p>
                 <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 mb-8">
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-3">What's Coming:</h4>
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-3">What&apos;s Coming:</h4>
                   <ul className="text-left text-gray-600 dark:text-gray-400 space-y-2">
                     <li className="flex items-center gap-2">
                       <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">

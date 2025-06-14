@@ -4,12 +4,21 @@ import { useState, useEffect } from "react";
 import { CodeSnippet } from "@/app/courses/components/CodeSnippet";
 import { BackButton } from "@/components/BackButton";
 
+interface Problem {
+    id: number;
+    name: string;
+    description: string;
+    code_snippet: string;
+    correct_lines: string;
+    hint: string;
+}
+
 interface CourseClientPageProps {
     course: { name: string; description: string };
     categoriesWithProblems: Array<{
         id: number;
         name: string;
-        problems: Array<any>;
+        problems: Array<Problem>;
     }>;
 }
 
