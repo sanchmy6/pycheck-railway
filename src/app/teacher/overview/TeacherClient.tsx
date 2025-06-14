@@ -197,7 +197,7 @@ export function TeacherClient({ initialCourses }: TeacherClientProps) {
       <div className="container mx-auto px-4 py-8">
         <BackButton href="/" label="Back to Home" />
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Teacher Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
           <div className="flex gap-4">
             <Link
               href="/teacher/create"
@@ -345,7 +345,7 @@ export function TeacherClient({ initialCourses }: TeacherClientProps) {
                                   Edit
                                 </Link>
                                 <Link
-                                  href={`/categories/${category.id}`}
+                                  href={`/courses/${course.id}?category=${category.id}`}
                                   className="px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                                 >
                                   View

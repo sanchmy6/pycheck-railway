@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { CodeSnippet } from "@/app/courses/components/CodeSnippet";
 import { BackButton } from "@/components/BackButton";
 
@@ -23,20 +24,34 @@ interface CourseClientPageProps {
 }
 
 export function CourseClientPage({ course, categoriesWithProblems }: CourseClientPageProps) {
+    const searchParams = useSearchParams();
     const [openedCategoryId, setOpenedCategoryId] = useState<number | null>(null);
     const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
     const [activeProblemId, setActiveProblemId] = useState<number | null>(null);
 
     useEffect(() => {
+        // Check for category parameter in URL
+        const categoryParam = searchParams.get('category');
+        const targetCategoryId = categoryParam ? parseInt(categoryParam, 10) : null;
+        
         if (categoriesWithProblems.length > 0 && activeCategoryId === null) {
-            const firstCategory = categoriesWithProblems[0];
-            setActiveCategoryId(firstCategory.id);
-            setOpenedCategoryId(firstCategory.id);
-            if (firstCategory.problems.length > 0) {
-                setActiveProblemId(firstCategory.problems[0].id);
+            let categoryToSelect = categoriesWithProblems[0];
+            
+            // If a specific category is requested in URL, try to find and select it
+            if (targetCategoryId) {
+                const requestedCategory = categoriesWithProblems.find(cat => cat.id === targetCategoryId);
+                if (requestedCategory) {
+                    categoryToSelect = requestedCategory;
+                }
+            }
+            
+            setActiveCategoryId(categoryToSelect.id);
+            setOpenedCategoryId(categoryToSelect.id);
+            if (categoryToSelect.problems.length > 0) {
+                setActiveProblemId(categoryToSelect.problems[0].id);
             }
         }
-    }, [categoriesWithProblems, activeCategoryId]);
+    }, [categoriesWithProblems, activeCategoryId, searchParams]);
 
     // Scroll-based problem detection
     useEffect(() => {
