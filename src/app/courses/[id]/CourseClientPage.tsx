@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { CodeSnippet } from "@/app/courses/components/CodeSnippet";
 import { BackButton } from "@/components/BackButton";
 

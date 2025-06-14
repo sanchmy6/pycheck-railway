@@ -1,6 +1,7 @@
 import { getCategoriesByCourseId, getCourseById, getProblemsByCategoryId } from "../actions";
 import { CourseClientPage } from "./CourseClientPage";
 import { Suspense } from "react";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -100,19 +101,19 @@ function CourseNotFound() {
                     </p>
                     
                     <div className="space-y-3">
-                        <a
+                        <Link
                             href="/courses"
                             className="block w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
                         >
                             Browse All Courses
-                        </a>
+                        </Link>
                         
-                        <a
+                        <Link
                             href="/"
                             className="block w-full px-6 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-colors duration-200"
                         >
                             Back to Home
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </div>
