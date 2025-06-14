@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CodeSnippet } from "@/app/courses/components/CodeSnippet";
 import { BackButton } from "@/components/BackButton";
 
@@ -16,6 +16,14 @@ interface CourseClientPageProps {
 export function CourseClientPage({ course, categoriesWithProblems }: CourseClientPageProps) {
     const [openedCategoryIds, setOpenedCategoryIds] = useState<number[]>([]);
     const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
+
+    useEffect(() => {
+        if (categoriesWithProblems.length > 0 && activeCategoryId === null) {
+            const firstCategory = categoriesWithProblems[0];
+            setActiveCategoryId(firstCategory.id);
+            setOpenedCategoryIds([firstCategory.id]);
+        }
+    }, [categoriesWithProblems, activeCategoryId]);
 
     const toggleCategoryOpen = (categoryId: number) => {
         setOpenedCategoryIds((prev) =>
