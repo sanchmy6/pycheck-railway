@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import ThemeToggle from "@/components/ThemeToggle";
+import Header from "@/components/Header";
 import "./globals.css";
 import { QueryProvider } from "./providers/QueryProvider";
 
@@ -30,7 +30,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <QueryProvider>
-          <ThemeToggle/>
+          <Header />
           {children}
         </QueryProvider>
       </body>
