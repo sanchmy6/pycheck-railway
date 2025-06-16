@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authenticateTeacher, validateAuthToken } from "./actions";
 import { BackButton } from "@/components/BackButton";
-import { checkExistingAuth } from "./utils";
+import { checkExistingAuth, notifyAuthStateChanged } from "./utils";
 
 export default function TeacherLoginPage() {
   const [password, setPassword] = useState("");
@@ -54,6 +54,7 @@ export default function TeacherLoginPage() {
       
       if (result.success) {
         sessionStorage.setItem("teacher_token", result.token || "");
+        notifyAuthStateChanged();
         router.push("/teacher/overview");
       } else {
         setError(result.error || "Authentication failed");

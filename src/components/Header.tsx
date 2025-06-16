@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { checkExistingAuth } from "@/app/teacher/utils";
+import { checkExistingAuth, notifyAuthStateChanged } from "@/app/teacher/utils";
 
 export default function Header() {
   const [isToggled, setIsToggled] = useState(false);
@@ -28,10 +28,17 @@ export default function Header() {
     };
 
     checkAuth();
+    
     const handleStorageChange = () => checkAuth();
-    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
 
-    return () => window.removeEventListener('storage', handleStorageChange);
+    const handleAuthChange = () => checkAuth();
+    window.addEventListener("authStateChanged", handleAuthChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("authStateChanged", handleAuthChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -52,6 +59,7 @@ export default function Header() {
     sessionStorage.removeItem("teacher_token");
     setIsAuthenticated(false);
     setShowUserMenu(false);
+    notifyAuthStateChanged();
     router.push("/");
   };
 
@@ -63,13 +71,13 @@ export default function Header() {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
-      if (showUserMenu && !target.closest('.user-menu-container')) {
+      if (showUserMenu && !target.closest(".user-menu-container")) {
         setShowUserMenu(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showUserMenu]);
 
   return (
@@ -151,8 +159,8 @@ export default function Header() {
                   </svg>
                 </button>
               ) : (
-                <Link
-                  href="/teacher"
+                <button
+                  onClick={() => router.push("/teacher")}
                   className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                   aria-label="Teacher Login"
                 >
@@ -169,7 +177,7 @@ export default function Header() {
                       d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                     />
                   </svg>
-                </Link>
+                </button>
               )}
 
               {/* User Menu Dropdown */}

@@ -41,4 +41,10 @@ export function checkExistingAuth(): { token: string | null; isValid: boolean } 
     }
     return { token: null, isValid: false };
   }
+}
+
+export function notifyAuthStateChanged() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("authStateChanged"));
+  }
 } 
