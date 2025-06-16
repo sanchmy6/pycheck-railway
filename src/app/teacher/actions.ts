@@ -1,10 +1,10 @@
 "use server";
 
-import { verifyTeacherPassword, generateAuthToken } from "@/lib/auth";
+import { verifyTeacherPassword, generateAuthToken, verifyAuthToken } from "@/lib/auth";
 import { createProblem, queryCategories, queryCourses, queryCategoriesByCourseId, createCategory, createCourse, updateCourse, updateCategory, updateProblem, findCourseById, findCategoryById, findProblemById, queryCoursesWithBasicStats, queryCategoriesWithProblemsForCourse, findProblemWithCategoryAndCourse, findCategoryWithCourse, queryCoursesWithCompleteData, deleteCourse, deleteCategory, deleteProblem } from "@/lib/db/db-helpers";
 import { revalidatePath } from "next/cache";
 import { importProblems } from "./import-actions";
-import { isValidAuthToken, isUniqueConstraintError, isForeignKeyConstraintError } from "./utils";
+import { isUniqueConstraintError, isForeignKeyConstraintError } from "./utils";
 
 export async function authenticateTeacher(password: string) {
   const isValid = verifyTeacherPassword(password);
@@ -15,6 +15,20 @@ export async function authenticateTeacher(password: string) {
   }
   
   return { success: false, error: "Invalid password" };
+}
+
+export async function validateAuthToken(authToken: string) {
+  if (!authToken) {
+    return { success: false, error: "No token provided" };
+  }
+  
+  const isValid = verifyAuthToken(authToken);
+  
+  if (isValid) {
+    return { success: true };
+  }
+  
+  return { success: false, error: "Invalid or expired token" };
 }
 
 export async function getCourses() {
@@ -34,7 +48,7 @@ export async function getCategoriesByCourse(courseId: number) {
 }
 
 export async function createCourseAction(authToken: string, name: string, description: string) {
-  if (!isValidAuthToken(authToken)) {
+  if (!verifyAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -50,7 +64,7 @@ export async function createCourseAction(authToken: string, name: string, descri
 }
 
 export async function createCategoryAction(authToken: string, name: string, courseId: number) {
-  if (!isValidAuthToken(authToken)) {
+  if (!verifyAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -77,7 +91,7 @@ export async function createProblemAction(
     hint: string;
   }
 ) {
-  if (!isValidAuthToken(authToken)) {
+  if (!verifyAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -120,7 +134,7 @@ export async function createProblemAction(
 }
 
 export async function updateCourseAction(authToken: string, id: number, name: string, description: string) {
-  if (!isValidAuthToken(authToken)) {
+  if (!verifyAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -138,7 +152,7 @@ export async function updateCourseAction(authToken: string, id: number, name: st
 }
 
 export async function updateCategoryAction(authToken: string, id: number, name: string, courseId: number) {
-  if (!isValidAuthToken(authToken)) {
+  if (!verifyAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -171,7 +185,7 @@ export async function updateProblemAction(
     hint: string;
   }
 ) {
-  if (!isValidAuthToken(authToken)) {
+  if (!verifyAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -215,7 +229,7 @@ export async function updateProblemAction(
 }
 
 export async function getCourseById(authToken: string, id: number) {
-  if (!isValidAuthToken(authToken)) {
+  if (!verifyAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -228,7 +242,7 @@ export async function getCourseById(authToken: string, id: number) {
 }
 
 export async function getCategoryById(authToken: string, id: number) {
-  if (!isValidAuthToken(authToken)) {
+  if (!verifyAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -241,7 +255,7 @@ export async function getCategoryById(authToken: string, id: number) {
 }
 
 export async function getProblemById(authToken: string, id: number) {
-  if (!isValidAuthToken(authToken)) {
+  if (!verifyAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -259,7 +273,7 @@ export async function getCoursesBasic() {
 }
 
 export async function getCategoriesWithProblemsForCourseAction(authToken: string, courseId: number) {
-  if (!isValidAuthToken(authToken)) {
+  if (!verifyAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -272,7 +286,7 @@ export async function getCategoriesWithProblemsForCourseAction(authToken: string
 }
 
 export async function getProblemByIdOptimized(authToken: string, id: number) {
-  if (!isValidAuthToken(authToken)) {
+  if (!verifyAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -285,7 +299,7 @@ export async function getProblemByIdOptimized(authToken: string, id: number) {
 }
 
 export async function getCategoryByIdOptimized(authToken: string, id: number) {
-  if (!isValidAuthToken(authToken)) {
+  if (!verifyAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -299,7 +313,7 @@ export async function getCategoryByIdOptimized(authToken: string, id: number) {
 
 // Delete
 export async function deleteCourseAction(authToken: string, id: number) {
-  if (!isValidAuthToken(authToken)) {
+  if (!verifyAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -314,7 +328,7 @@ export async function deleteCourseAction(authToken: string, id: number) {
 }
 
 export async function deleteCategoryAction(authToken: string, id: number) {
-  if (!isValidAuthToken(authToken)) {
+  if (!verifyAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
@@ -329,7 +343,7 @@ export async function deleteCategoryAction(authToken: string, id: number) {
 }
 
 export async function deleteProblemAction(authToken: string, id: number) {
-  if (!isValidAuthToken(authToken)) {
+  if (!verifyAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 

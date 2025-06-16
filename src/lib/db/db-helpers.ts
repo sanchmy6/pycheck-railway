@@ -1,23 +1,22 @@
-import { prisma } from '@/prisma';
+import { prisma } from "@/prisma";
 
-// Warm up database connection to eliminate first-query delays
-let isWarmedUp = false;
-export async function warmUpConnection() {
-  if (isWarmedUp) return;
-  
+/**
+ * Warm up database connection for faster initial queries
+ */
+export async function warmupDatabase() {
   try {
-    // Execute a lightweight query to establish connection
     await prisma.$queryRaw`SELECT 1`;
-    isWarmedUp = true;
-    console.log('Database connection warmed up');
+    console.log("Database connection warmed up");
   } catch (error) {
-    console.log('Database warm-up failed:', error);
+    console.log("Database warm-up failed:", error);
   }
 }
 
-// Auto warm-up on module load
-if (typeof window === 'undefined') { // Server-side only
-  warmUpConnection();
+export function ensureServerSide() {
+  if (typeof window === "undefined") { // Server-side only
+    return true;
+  }
+  throw new Error("This function can only be called on the server side");
 }
 
 // Course helpers

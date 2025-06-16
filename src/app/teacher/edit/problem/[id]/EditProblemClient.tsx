@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -66,40 +66,7 @@ export function EditProblemClient({ problemId, initialCourses }: EditProblemClie
     refetchOnWindowFocus: false,
   });
 
-  useEffect(() => {
-    const token = sessionStorage.getItem("teacher_token");
-    if (!token) {
-      router.push("/teacher");
-      return;
-    }
-    
-    setAuthToken(token);
-    setIsAuthenticated(true);
-  }, [router]);
-
-  useEffect(() => {
-    if (problemData) {
-      const correctLinesArray = problemData.correct_lines.split(",").map(line => parseInt(line.trim()));
-      const courseId = problemData.category.course.id;
-      const categoryId = problemData.category.id;
-      
-      setFormData({
-        name: problemData.name,
-        description: problemData.description,
-        courseId: courseId.toString(),
-        categoryId: categoryId.toString(),
-        codeSnippet: problemData.code_snippet,
-        hint: problemData.hint
-      });
-      
-      setSelectedLines(correctLinesArray);
-      setReasons(problemData.reason as Record<string, string>);
-
-      loadCategoriesForCourse(courseId);
-    }
-  }, [problemData]);
-
-  const loadCategoriesForCourse = async (courseId: number) => {
+  const loadCategoriesForCourse = useCallback(async (courseId: number) => {
     // Check cache first
     const cacheKey = ["categories", courseId];
     const cachedCategories = queryClient.getQueryData(cacheKey);
@@ -120,7 +87,40 @@ export function EditProblemClient({ problemId, initialCourses }: EditProblemClie
     } catch {
       setError("Failed to load categories. Please try again.");
     }
-  };
+  }, [queryClient]);
+
+  useEffect(() => {
+    const token = sessionStorage.getItem("teacher_token");
+    if (!token) {
+      router.push("/teacher");
+      return;
+    }
+    
+    setAuthToken(token);
+    setIsAuthenticated(true);
+  }, [router]);
+
+  useEffect(() => {
+    if (problemData) {
+      const courseId = problemData.category.courseId;
+      const categoryId = problemData.categoryId;
+      const correctLinesArray = problemData.correct_lines.split(",").map(Number);
+      
+      setFormData({
+        name: problemData.name,
+        description: problemData.description,
+        courseId: courseId.toString(),
+        categoryId: categoryId.toString(),
+        codeSnippet: problemData.code_snippet,
+        hint: problemData.hint
+      });
+      
+      setSelectedLines(correctLinesArray);
+      setReasons(problemData.reason as Record<string, string>);
+
+      loadCategoriesForCourse(courseId);
+    }
+  }, [problemData, loadCategoriesForCourse]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -279,12 +279,6 @@ export function EditProblemClient({ problemId, initialCourses }: EditProblemClie
     }
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("teacher_token");
-    queryClient.clear(); // Clear all caches on logout
-    router.push("/teacher");
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -331,12 +325,6 @@ export function EditProblemClient({ problemId, initialCourses }: EditProblemClie
             >
               Back to Overview
             </Link>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-            >
-              Logout
-            </button>
           </div>
         </div>
 

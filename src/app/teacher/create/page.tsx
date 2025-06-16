@@ -231,10 +231,7 @@ export default function CreateProblemPage() {
     }
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("teacher_token");
-    router.push("/teacher");
-  };
+
 
   if (isLoading) {
     return (
@@ -254,12 +251,6 @@ export default function CreateProblemPage() {
         <BackButton href="/teacher/overview" label="Back to Dashboard" />
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create New Problem</h1>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-          >
-            Logout
-          </button>
         </div>
 
         <div className="max-w-4xl mx-auto">

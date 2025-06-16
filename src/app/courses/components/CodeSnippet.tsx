@@ -275,7 +275,7 @@ export function CodeSnippet({ code, problemId, language = "python", problemData 
                   You found {feedback.correctSelectionsCount} of {feedback.expectedLinesCount} correct lines.
                   {(feedback.missingLinesCount && feedback.missingLinesCount > 0) && (
                     <span className="block mt-1">
-                      {feedback.missingLinesCount} more correct line{feedback.missingLinesCount !== 1 ? 's' : ''} {feedback.missingLinesCount !== 1 ? 'are' : 'is'} missing.
+                      {feedback.missingLinesCount} more correct line{feedback.missingLinesCount !== 1 ? "s" : ""} {feedback.missingLinesCount !== 1 ? "are" : "is"} missing.
                     </span>
                   )}
                 </div>

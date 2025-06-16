@@ -32,26 +32,27 @@ export default function EditCoursePage() {
     
     setAuthToken(token);
     setIsAuthenticated(true);
+    
+    const loadCourse = async (token: string) => {
+      try {
+        const result = await getCourseById(token, courseId);
+        if (result.success && result.course) {
+          setFormData({
+            name: result.course.name,
+            description: result.course.description || ""
+          });
+        } else {
+          setError(result.error || "Failed to load course");
+        }
+      } catch {
+        setError("Failed to load course data. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
     loadCourse(token);
   }, [router, courseId]);
-
-  const loadCourse = async (token: string) => {
-    try {
-      const result = await getCourseById(token, courseId);
-      if (result.success && result.course) {
-        setFormData({
-          name: result.course.name,
-          description: result.course.description || ""
-        });
-      } else {
-        setError(result.error || "Failed to load course");
-      }
-    } catch {
-      setError("Failed to load course data. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -108,11 +109,6 @@ export default function EditCoursePage() {
     }
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("teacher_token");
-    router.push("/teacher");
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -143,12 +139,6 @@ export default function EditCoursePage() {
             >
               Back to Overview
             </Link>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-            >
-              Logout
-            </button>
           </div>
         </div>
 
