@@ -11,6 +11,7 @@ export default function TeacherLoginPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [showLoginMessage, setShowLoginMessage] = useState(false);
   
   const router = useRouter();
 
@@ -55,7 +56,19 @@ export default function TeacherLoginPage() {
       if (result.success) {
         sessionStorage.setItem("teacher_token", result.token || "");
         notifyAuthStateChanged();
-        router.push("/teacher/overview");
+        
+        // Show login success message
+        setShowLoginMessage(true);
+        
+        // Hide the login message after 2 seconds and then redirect
+        setTimeout(() => {
+          setShowLoginMessage(false);
+        }, 2000);
+        
+        // Redirect after a short delay to let the message show
+        setTimeout(() => {
+          router.push("/teacher/overview");
+        }, 1500);
       } else {
         setError(result.error || "Authentication failed");
       }
@@ -79,55 +92,73 @@ export default function TeacherLoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-md w-full space-y-8">
-        <div className="absolute top-8 left-8">
-          <BackButton href="/" label="Back to Home" />
-        </div>
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-            Admin Access
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            Enter the password to access the admin dashboard
-          </p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-              placeholder="Enter password..."
-            />
-          </div>
-
-          {error && (
-            <div className="rounded-md bg-red-50 p-4 dark:bg-red-900/30">
-              <div className="text-sm text-red-700 dark:text-red-400">
-                {error}
-              </div>
+    <>
+      {/* Floating Login Success Message */}
+      {showLoginMessage && (
+        <div className="fixed top-4 right-4 z-[60] animate-in slide-in-from-top-2 duration-300">
+          <div className="bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-lg px-4 py-3 shadow-lg">
+            <div className="flex items-center space-x-2">
+              <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="text-green-700 dark:text-green-300 font-medium text-sm">
+                Logged in successfully
+              </span>
             </div>
-          )}
-
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "Authenticating..." : "Login"}
-            </button>
           </div>
-        </form>
+        </div>
+      )}
+
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-md w-full space-y-8">
+          <div className="absolute top-8 left-8">
+            <BackButton href="/" label="Back to Home" />
+          </div>
+          <div>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+              Admin Access
+            </h2>
+            <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+              Enter the password to access the admin dashboard
+            </p>
+          </div>
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                placeholder="Enter password..."
+              />
+            </div>
+
+            {error && (
+              <div className="rounded-md bg-red-50 p-4 dark:bg-red-900/30">
+                <div className="text-sm text-red-700 dark:text-red-400">
+                  {error}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? "Authenticating..." : "Login"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 } 
