@@ -279,12 +279,6 @@ export function EditProblemClient({ problemId, initialCourses }: EditProblemClie
     }
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("teacher_token");
-    queryClient.clear(); // Clear all caches on logout
-    router.push("/teacher");
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -331,12 +325,6 @@ export function EditProblemClient({ problemId, initialCourses }: EditProblemClie
             >
               Back to Overview
             </Link>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-            >
-              Logout
-            </button>
           </div>
         </div>
 

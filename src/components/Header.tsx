@@ -2,9 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { checkExistingAuth } from "@/app/teacher/utils";
 
 export default function Header() {
   const [isToggled, setIsToggled] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const htmlElement = document.documentElement;
@@ -13,6 +18,20 @@ export default function Header() {
     if (hasDarkTheme) {
       setIsToggled(true);
     }
+  }, []);
+
+  // Check auth
+  useEffect(() => {
+    const checkAuth = () => {
+      const authResult = checkExistingAuth();
+      setIsAuthenticated(authResult.isValid);
+    };
+
+    checkAuth();
+    const handleStorageChange = () => checkAuth();
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   useEffect(() => {
@@ -28,6 +47,30 @@ export default function Header() {
   const toggleTheme = () => {
     setIsToggled((prev) => !prev);
   };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("teacher_token");
+    setIsAuthenticated(false);
+    setShowUserMenu(false);
+    router.push("/");
+  };
+
+  const toggleUserMenu = () => {
+    setShowUserMenu((prev) => !prev);
+  };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (showUserMenu && !target.closest('.user-menu-container')) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showUserMenu]);
 
   return (
     <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-50">
@@ -86,25 +129,70 @@ export default function Header() {
               )}
             </button>
             
-            <Link
-              href="/teacher"
-              className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              aria-label="Teacher Login"
-            >
-              <svg 
-                className="h-5 w-5 text-gray-600 dark:text-gray-400" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-            </Link>
+            <div className="relative user-menu-container">
+              {isAuthenticated ? (
+                <button
+                  onClick={toggleUserMenu}
+                  className="p-2 rounded-full bg-green-100 dark:bg-green-900 hover:bg-green-200 dark:hover:bg-green-800 transition-colors"
+                  aria-label="User Menu"
+                >
+                  <svg 
+                    className="h-5 w-5 text-green-600 dark:text-green-400" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                </button>
+              ) : (
+                <Link
+                  href="/teacher"
+                  className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  aria-label="Teacher Login"
+                >
+                  <svg 
+                    className="h-5 w-5 text-gray-600 dark:text-gray-400" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                </Link>
+              )}
+
+              {/* User Menu Dropdown */}
+              {isAuthenticated && showUserMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                  <div className="py-1">
+                    <Link
+                      href="/teacher/overview"
+                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

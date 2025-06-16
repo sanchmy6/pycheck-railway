@@ -83,10 +83,7 @@ export function TeacherClient({ initialCourses }: TeacherClientProps) {
     }
   }, [router]);
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("teacher_token");
-    router.push("/teacher");
-  };
+
 
   const coursesWithStats = useMemo(() => {
     return courses.map(course => ({
@@ -225,12 +222,6 @@ export function TeacherClient({ initialCourses }: TeacherClientProps) {
                 </svg>
               </button>
             </div>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-            >
-              Logout
-            </button>
           </div>
         </div>
 
