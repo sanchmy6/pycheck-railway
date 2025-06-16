@@ -26,9 +26,11 @@ Copy the configuration template:
 cp .env.template .env
 ```
 
+Edit the `.env` file and configure all required environment variables.
+
 ### 2. Setup
 
-Ensure that the `.env` is configured then run:
+Install dependencies:
 
 ```bash
 npm install
@@ -36,19 +38,19 @@ npm install
 
 #### Database Setup
 
-1. Generate the prisma client
+1. Generate the Prisma client:
 
 ```bash
 npx prisma generate
 ```
 
-2. Run the database migrations
+2. Run the database migrations:
 
 ```bash
 npx prisma migrate dev
 ```
 
-3. (optional) Seed the database
+3. (Optional) Seed the database:
 
 ```bash
 npm run seed
@@ -56,7 +58,7 @@ npm run seed
 
 ### 3. Startup
 
-First, run the development server:
+Start the development server:
 
 ```bash
 npm run dev
@@ -68,15 +70,15 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ### Database
 
-To add new models to the database you can simply update/extend the `schema.prisma` and create a new migration for your changes.
+To add new models to the database, update/extend the `schema.prisma` file and create a new migration for your changes.
 
-The command to create a new migration is as follows:
+Create a new migration:
 
 ```bash
-npx primsa migrate dev --name <your_migration_name>
+npx prisma migrate dev --name <your_migration_name>
 ```
 
-Then afterwards run:
+Apply the migration:
 
 ```bash
 npx prisma migrate dev
@@ -86,56 +88,82 @@ npx prisma migrate dev
 
 ### 1. Configuration
 
-Copy the configuration template and adjust the `MYSQL_HOST` variable and set it to `mysql_db`:
+Copy the configuration template and adjust the `MYSQL_HOST` variable to `mysql_db`:
 
 ```bash
 cp .env.template .env
 ```
 
-Adjust all other environment variables as needed. For full functionality, it is required to adjust and set **all** variables.
+Edit the `.env` file and configure all environment variables. For full functionality, it is required to adjust and set **all** variables.
 
 ### 2. Run Docker
 
-Use this command every time you need to start your containers. Don't forget to run it from the main folder of your app:
+Start the containers (run this command from the project root directory):
 
 ```bash
 docker compose up --build
 ```
 
-### 3. Edit Database
+### 3. Configure Database Permissions
 
-Using your Docker Desktop client, go into the database container, tab "exec":
+#### Option A: Using Terminal
+
+First, find the MySQL container name:
+
+```bash
+docker ps
+```
+
+Look for the container running MySQL (usually named something like `pycheck-mysql_db-1` or similar).
+
+Access the MySQL container:
+
+```bash
+docker exec -it <mysql_container_name> mysql -u root -proot
+```
+
+Alternatively, if you know the exact container name from your docker-compose.yml:
+
+```bash
+docker exec -it pycheck-mysql_db-1 mysql -u root -proot
+```
+
+#### Option B: Using Docker Desktop
+
+Open Docker Desktop, navigate to the database container, and open the "exec" tab.
+
+Connect to MySQL:
 
 ```bash
 mysql -h 127.0.0.1 -u root -proot
 ```
 
-In the mysql console that appears:
+#### Execute Database Commands
+
+Once connected to MySQL (using either option above), execute:
 
 ```bash
 GRANT ALL PRIVILEGES ON *.* TO username@'%' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 ```
 
-The privileges are required to create a prisma shadow DB.
+These privileges are required to create a Prisma shadow database.
 
 ### 4. Restart Docker
 
-Stop the container. Typically, Ctrl+C in a default terminal.
-
-Again, use this command every time you need to stop the container:
+Stop the containers (typically Ctrl+C in the terminal):
 
 ```bash
 docker compose down --remove-orphans
 ```
 
-Then start the container as usual (step 2).
+Then restart using step 2.
 
 ### 5. Enable Watch (Optional)
 
-Watch allows automatic rebuilds upon changing your source code. Alternatively, you can just restart your setup using Step 4 and then Step 2.
+Watch mode enables automatic rebuilds when source code changes. Alternatively, you can manually restart using steps 4 and 2.
 
-Open a different console and use this command:
+In a separate terminal, run:
 
 ```bash
 docker compose watch
