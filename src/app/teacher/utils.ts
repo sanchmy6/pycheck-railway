@@ -32,7 +32,7 @@ export function checkExistingAuth(): { token: string | null; isValid: boolean } 
     }
     
     return { token, isValid: true };
-  } catch (error) {
+  } catch {
     // If there's any error, clean up potentially corrupted token
     try {
       sessionStorage.removeItem("teacher_token");

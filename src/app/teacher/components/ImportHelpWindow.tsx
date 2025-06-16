@@ -7,8 +7,10 @@ interface ImportHelpWindowProps {
   onClose: () => void;
 }
 
+type TabType = "overview" | "format" | "setup";
+
 export function ImportHelpWindow({ isOpen, onClose }: ImportHelpWindowProps) {
-  const [activeTab, setActiveTab] = useState<"overview" | "format" | "setup">("overview");
+  const [activeTab, setActiveTab] = useState<TabType>("overview");
 
   if (!isOpen) return null;
 
@@ -40,7 +42,7 @@ export function ImportHelpWindow({ isOpen, onClose }: ImportHelpWindowProps) {
             ].map((tab) => (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key as any)}
+                onClick={() => setActiveTab(tab.key as TabType)}
                 className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab.key
                     ? "border-blue-500 text-blue-600 dark:text-blue-400"
@@ -70,7 +72,7 @@ export function ImportHelpWindow({ isOpen, onClose }: ImportHelpWindowProps) {
                   <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
                     <li>• If a problem with the same name exists in the same lecture, it will be updated</li>
                     <li>• If no matching problem exists, a new one will be created</li>
-                    <li>• Courses and lectures are auto-created if they don't exist</li>
+                    <li>• Courses and lectures are auto-created if they don&apos;t exist</li>
                   </ul>
                 </div>
               </div>
@@ -94,7 +96,7 @@ export function ImportHelpWindow({ isOpen, onClose }: ImportHelpWindowProps) {
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-sm font-medium">4</span>
-                    <span>Click "Import from Sheet" button</span>
+                    <span>Click &quot;Import from Sheet&quot; button</span>
                   </li>
                 </ol>
               </div>
@@ -104,7 +106,7 @@ export function ImportHelpWindow({ isOpen, onClose }: ImportHelpWindowProps) {
           {activeTab === "setup" && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3"> 
                   1. Environment Variable
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-3">
@@ -112,7 +114,7 @@ export function ImportHelpWindow({ isOpen, onClose }: ImportHelpWindowProps) {
                 </p>
                 <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
                   <code className="text-sm font-mono text-gray-800 dark:text-gray-200">
-                    GOOGLE_SHEET_ID="your-google-sheet-id-here"
+                    GOOGLE_SHEET_ID=&quot;your-google-sheet-id-here&quot;
                   </code>
                 </div>
                 <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
@@ -135,15 +137,15 @@ export function ImportHelpWindow({ isOpen, onClose }: ImportHelpWindowProps) {
                 <ol className="space-y-2 text-gray-600 dark:text-gray-400">
                   <li className="flex items-start gap-3">
                     <span className="flex-shrink-0 w-6 h-6 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center text-sm font-medium">1</span>
-                    <span>Click "Share" in your Google Sheet</span>
+                    <span>Click &quot;Share&quot; in your Google Sheet</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="flex-shrink-0 w-6 h-6 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center text-sm font-medium">2</span>
-                    <span>Change access to "Anyone with the link can view"</span>
+                    <span>Change access to &quot;Anyone with the link can view&quot;</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="flex-shrink-0 w-6 h-6 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center text-sm font-medium">3</span>
-                    <span>Ensure "Viewer" permissions are set</span>
+                    <span>Ensure &quot;Viewer&quot; permissions are set</span>
                   </li>
                 </ol>
               </div>
@@ -178,8 +180,8 @@ export function ImportHelpWindow({ isOpen, onClose }: ImportHelpWindowProps) {
                       {[
                         { name: "name", required: true, desc: "Problem name" },
                         { name: "description", required: false, desc: "Problem description" },
-                        { name: "courseName", required: true, desc: "Course name (created if doesn't exist)" },
-                        { name: "lectureName", required: true, desc: "Lecture name (created if doesn't exist)" },
+                        { name: "courseName", required: true, desc: "Course name (created if doesn&apos;t exist)" },
+                        { name: "lectureName", required: true, desc: "Lecture name (created if doesn&apos;t exist)" },
                         { name: "codeSnippet", required: true, desc: "Code to display (supports multiline)" },
                         { name: "correctLines", required: true, desc: "Comma-separated line numbers" },
                         { name: "hint", required: true, desc: "Hint text" },
@@ -223,7 +225,7 @@ export function ImportHelpWindow({ isOpen, onClose }: ImportHelpWindowProps) {
                   <div className="border border-green-200 dark:border-green-700 rounded-lg p-4">
                     <h4 className="font-medium text-green-800 dark:text-green-200 mb-2">Correct Lines</h4>
                     <p className="text-sm text-green-700 dark:text-green-300">
-                      Must contain valid integers separated by commas. Example: "1,2,5"
+                      Must contain valid integers separated by commas. Example: &quot;1,2,5&quot;
                     </p>
                   </div>
                   
@@ -233,7 +235,7 @@ export function ImportHelpWindow({ isOpen, onClose }: ImportHelpWindowProps) {
                       Must be valid JSON format. Example:
                     </p>
                     <code className="text-xs bg-purple-100 dark:bg-purple-900/30 p-2 rounded block">
-                      {"{"}"1": "Missing value after equals sign", "2": "Syntax error"{"}"} 
+                      {`{"1": "Missing value after equals sign", "2": "Syntax error"}`}
                     </code>
                   </div>
                 </div>
