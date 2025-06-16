@@ -2,11 +2,11 @@
 
 import { queryCourses, queryCategoriesByCourseId, createCategory, createCourse, updateProblem, createProblem, queryCategoriesWithProblemsForCourse } from "@/lib/db/db-helpers";
 import { revalidatePath } from "next/cache";
-import { isValidAuthToken } from "./utils";
+import { verifyAuthToken } from "@/lib/auth";
 import { parse } from "csv-parse/sync";
 
 export async function importProblems(authToken: string) {
-  if (!isValidAuthToken(authToken)) {
+  if (!verifyAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 

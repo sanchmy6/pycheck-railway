@@ -1,16 +1,48 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { authenticateTeacher } from "./actions";
+import { authenticateTeacher, validateAuthToken } from "./actions";
 import { BackButton } from "@/components/BackButton";
+import { checkExistingAuth } from "./utils";
 
 export default function TeacherLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   
   const router = useRouter();
+
+  // Check for existing authentication on component mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const authResult = checkExistingAuth();
+        
+        if (authResult.isValid && authResult.token) {
+          // Optionally validate with server for extra security
+          const serverValidation = await validateAuthToken(authResult.token);
+          
+          if (serverValidation.success) {
+            // User is already authenticated, redirect to dashboard
+            router.push("/teacher/overview");
+            return;
+          } else {
+            // Server says token is invalid, clean it up
+            sessionStorage.removeItem("teacher_token");
+          }
+        }
+      } catch (error) {
+        // Handle any errors during auth check
+        console.error("Auth check error:", error);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +64,18 @@ export default function TeacherLoginPage() {
       setIsLoading(false);
     }
   };
+
+  // Show loading spinner while checking existing authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="flex items-center space-x-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="text-lg text-gray-700 dark:text-gray-300">Checking authentication...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
