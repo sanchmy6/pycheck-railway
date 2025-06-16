@@ -68,7 +68,7 @@ export default function TeacherLoginPage() {
         // Redirect after a short delay to let the message show
         setTimeout(() => {
           router.push("/teacher/overview");
-        }, 1500);
+        }, 500);
       } else {
         setError(result.error || "Authentication failed");
       }
