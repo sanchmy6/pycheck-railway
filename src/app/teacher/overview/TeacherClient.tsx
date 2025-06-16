@@ -173,7 +173,7 @@ export function TeacherClient({ initialCourses }: TeacherClientProps) {
       const err = error as Error;
       setImportResult({
         success: false,
-        error: `Import failed: ${err.message || 'Unknown error'}`
+        error: `Import failed: ${err.message || "Unknown error"}`
       });
     } finally {
       setIsImporting(false);
@@ -477,9 +477,9 @@ export function TeacherClient({ initialCourses }: TeacherClientProps) {
                   </div>
                 )}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {importResult.success ? 'Import Successful' : 'Import Failed'}
-                  </h3>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                    {importResult.success ? "Import Successful" : "Import Failed"}
+                  </h2>
                 </div>
               </div>
             </div>

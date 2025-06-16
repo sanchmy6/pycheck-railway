@@ -38,32 +38,33 @@ export default function EditCategoryPage() {
     
     setAuthToken(token);
     setIsAuthenticated(true);
+    
+    const loadData = async (token: string) => {
+      try {
+        const [categoryResult, coursesData] = await Promise.all([
+          getCategoryByIdOptimized(token, categoryId),
+          getCourses()
+        ]);
+
+        if (categoryResult.success && categoryResult.category) {
+          setFormData({
+            name: categoryResult.category.name,
+            courseId: categoryResult.category.courseId.toString()
+          });
+        } else {
+          setError(categoryResult.error || "Failed to load category");
+        }
+
+        setCourses(coursesData);
+      } catch {
+        setError("Failed to load category data. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
     loadData(token);
   }, [router, categoryId]);
-
-  const loadData = async (token: string) => {
-    try {
-      const [categoryResult, coursesData] = await Promise.all([
-        getCategoryByIdOptimized(token, categoryId),
-        getCourses()
-      ]);
-
-      if (categoryResult.success && categoryResult.category) {
-        setFormData({
-          name: categoryResult.category.name,
-          courseId: categoryResult.category.courseId.toString()
-        });
-      } else {
-        setError(categoryResult.error || "Failed to load category");
-      }
-
-      setCourses(coursesData);
-    } catch {
-      setError("Failed to load category data. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));

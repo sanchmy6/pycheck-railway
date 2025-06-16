@@ -32,26 +32,27 @@ export default function EditCoursePage() {
     
     setAuthToken(token);
     setIsAuthenticated(true);
+    
+    const loadCourse = async (token: string) => {
+      try {
+        const result = await getCourseById(token, courseId);
+        if (result.success && result.course) {
+          setFormData({
+            name: result.course.name,
+            description: result.course.description || ""
+          });
+        } else {
+          setError(result.error || "Failed to load course");
+        }
+      } catch {
+        setError("Failed to load course data. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
     loadCourse(token);
   }, [router, courseId]);
-
-  const loadCourse = async (token: string) => {
-    try {
-      const result = await getCourseById(token, courseId);
-      if (result.success && result.course) {
-        setFormData({
-          name: result.course.name,
-          description: result.course.description || ""
-        });
-      } else {
-        setError(result.error || "Failed to load course");
-      }
-    } catch {
-      setError("Failed to load course data. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));

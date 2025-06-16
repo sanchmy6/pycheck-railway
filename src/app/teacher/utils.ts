@@ -12,7 +12,7 @@ export function isForeignKeyConstraintError(error: unknown): boolean {
 
 export function checkExistingAuth(): { token: string | null; isValid: boolean } {
   try {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       // Server-side rendering
       return { token: null, isValid: false };
     }
