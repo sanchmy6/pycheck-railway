@@ -9,6 +9,7 @@ export default function Header() {
   const [isToggled, setIsToggled] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showLogoutMessage, setShowLogoutMessage] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -59,7 +60,14 @@ export default function Header() {
     sessionStorage.removeItem("teacher_token");
     setIsAuthenticated(false);
     setShowUserMenu(false);
+    setShowLogoutMessage(true);
     notifyAuthStateChanged();
+    
+    // Hide the logout message after 2 second
+    setTimeout(() => {
+      setShowLogoutMessage(false);
+    }, 2000);
+    
     router.push("/");
   };
 
@@ -81,7 +89,24 @@ export default function Header() {
   }, [showUserMenu]);
 
   return (
-    <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-50">
+    <>
+      {/* Floating Logout Message */}
+      {showLogoutMessage && (
+        <div className="fixed top-4 right-4 z-[60] animate-in slide-in-from-top-2 duration-300">
+          <div className="bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-lg px-4 py-3 shadow-lg">
+            <div className="flex items-center space-x-2">
+              <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="text-green-700 dark:text-green-300 font-medium text-sm">
+                Logged out successfully
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
@@ -205,5 +230,6 @@ export default function Header() {
         </div>
       </div>
     </header>
+    </>
   );
 } 
