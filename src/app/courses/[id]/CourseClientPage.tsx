@@ -31,7 +31,7 @@ export function CourseClientPage({ course, categoriesWithProblems }: CourseClien
 
     useEffect(() => {
         // Check for category parameter in URL
-        const categoryParam = searchParams.get('category');
+        const categoryParam = searchParams.get("category");
         const targetCategoryId = categoryParam ? parseInt(categoryParam, 10) : null;
         
         if (categoriesWithProblems.length > 0 && activeCategoryId === null) {
@@ -98,11 +98,11 @@ export function CourseClientPage({ course, categoriesWithProblems }: CourseClien
             }
         };
 
-        window.addEventListener('scroll', throttledScroll);
+        window.addEventListener("scroll", throttledScroll);
         // Initial check
         handleScroll();
-
-        return () => window.removeEventListener('scroll', throttledScroll);
+        
+        return () => window.removeEventListener("scroll", throttledScroll);
     }, [categoriesWithProblems, activeProblemId, activeCategoryId]);
 
     const toggleCategoryOpen = (categoryId: number) => {
@@ -128,9 +128,9 @@ export function CourseClientPage({ course, categoriesWithProblems }: CourseClien
         const element = document.getElementById(`problem-${problemId}`);
         if (element) {
             element.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start',
-                inline: 'nearest'
+                behavior: "smooth",
+                block: "start",
+                inline: "nearest",
             });
         }
     };
