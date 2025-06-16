@@ -1,6 +1,6 @@
 # PyCheck
 
-PyCheck is a web application built with Node.js and MySQL that provides an interactive learning experience for students to prepare for exam tasks.
+PyCheck is a web application built with next.js and MySQL that provides an interactive learning experience for students to prepare for exam tasks.
 
 ## System Requirements
 
