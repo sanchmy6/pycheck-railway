@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { BackButton } from "@/components/BackButton";
 import { deleteCourseAction, deleteCategoryAction, deleteProblemAction, importProblems, getCoursesWithStats } from "../actions";
+import { ImportHelpWindow } from "../components/ImportHelpWindow";
 
 interface Course {
   id: number;
@@ -46,6 +47,7 @@ export function TeacherClient({ initialCourses }: TeacherClientProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
   const [isImporting, setIsImporting] = useState(false);
+  const [showImportHelp, setShowImportHelp] = useState(false);
   const [importResult, setImportResult] = useState<{
     success: boolean;
     error?: string;
@@ -205,13 +207,24 @@ export function TeacherClient({ initialCourses }: TeacherClientProps) {
             >
               Create New Problem
             </Link>
-            <button
-              onClick={handleImport}
-              disabled={isImporting}
-              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isImporting ? "Importing..." : "Import from Sheet"}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleImport}
+                disabled={isImporting}
+                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isImporting ? "Importing..." : "Import from Sheet"}
+              </button>
+              <button
+                onClick={() => setShowImportHelp(true)}
+                className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+                title="Import Help"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+            </div>
             <button
               onClick={handleLogout}
               className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
@@ -596,6 +609,11 @@ export function TeacherClient({ initialCourses }: TeacherClientProps) {
           </div>
         </div>
       )}
+
+      <ImportHelpWindow 
+        isOpen={showImportHelp} 
+        onClose={() => setShowImportHelp(false)} 
+      />
     </div>
   );
 } 
