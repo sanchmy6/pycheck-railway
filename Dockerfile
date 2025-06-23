@@ -11,11 +11,13 @@ COPY ./next.config.ts ./
 COPY ./postcss.config.mjs ./
 COPY ./tsconfig.json ./
 COPY ./entrypoint.sh ./
+# COPY ./babel.config.js ./babel.config.js
 
 # Copy local directories to the current local directory of our docker image (/app)
 COPY ./src ./src
 COPY ./public ./public
 COPY ./prisma ./prisma
+COPY ./__tests__ ./__tests__
 
 RUN rm -rf ./.next
 
