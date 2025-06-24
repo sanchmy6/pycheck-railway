@@ -11,6 +11,9 @@ COPY ./next.config.ts ./
 COPY ./postcss.config.mjs ./
 COPY ./tsconfig.json ./
 COPY ./entrypoint.sh ./
+COPY ./.swrc ./.swrc
+COPY ./jest.config.js ./jest.config.js
+COPY ./jest.setup.js ./jest.setup.js
 # COPY ./babel.config.js ./babel.config.js
 
 # Copy local directories to the current local directory of our docker image (/app)

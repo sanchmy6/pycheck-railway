@@ -37,6 +37,9 @@ services:
         - action: rebuild
           path: src/
           target: .
+        - action: sync
+          path: /__tests__
+          target: /__tests__
     depends_on:
       mysql_db:
         condition: service_healthy
