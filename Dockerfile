@@ -14,18 +14,18 @@ COPY ./entrypoint.sh ./
 COPY ./.swrc ./.swrc
 COPY ./jest.config.js ./jest.config.js
 COPY ./jest.setup.js ./jest.setup.js
-# COPY ./babel.config.js ./babel.config.js
 
 # Copy local directories to the current local directory of our docker image (/app)
 COPY ./src ./src
 COPY ./public ./public
 COPY ./prisma ./prisma
 COPY ./__tests__ ./__tests__
+COPY ./__mocks__ ./__mocks__
 
 RUN rm -rf ./.next
 
 RUN npm install \
-    && npm run build 
+    && npm run build
 
 EXPOSE 3000
 
