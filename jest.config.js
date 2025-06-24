@@ -13,7 +13,11 @@ const config = {
         '^@/(.*)$': '<rootDir>/src/$1',
         'react-syntax-highlighter': '<rootDir>/__mocks__/react-syntax-highlighter.js',
     },
-    moduleDirectories: ['node_modules', '<rootDir>/'],
+    moduleDirectories: ['node_modules', 'src'],
+    coverageProvider: "v8",
+    collectCoverage: true,
+    collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/**/index.ts"],
+    coverageDirectory: "coverage"
 }
 
 module.exports = createJestConfig(config)

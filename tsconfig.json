@@ -53,7 +53,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-, "__tests__/Home.test.jsx"  ],
+  ],
   "exclude": [
     "node_modules"
   ],
