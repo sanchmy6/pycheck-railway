@@ -38,8 +38,17 @@ services:
           path: src/
           target: .
         - action: sync
-          path: /__tests__
-          target: /__tests__
+          path: public/
+          target: app/public/
+        - action: sync
+          path: __tests__/
+          target: app/__tests__/
+        - action: sync
+          path: jest.config.js
+          target: app/jest.config.js
+        - action: sync
+          path: jest.setup.js
+          target: app/jest.setup.js
     depends_on:
       mysql_db:
         condition: service_healthy
