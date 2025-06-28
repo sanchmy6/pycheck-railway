@@ -11,7 +11,7 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - '3306:3306'
+      - '3307:3307'
     networks:
       - app-network
     healthcheck:
@@ -28,7 +28,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: ["./entrypoint.sh"]
+    command: ["sh", "./entrypoint.sh"]
     container_name: next_web
     ports:
       - '3000:3000'
@@ -37,6 +37,18 @@ services:
         - action: rebuild
           path: src/
           target: .
+        - action: sync
+          path: public/
+          target: app/public/
+        - action: sync
+          path: __tests__/
+          target: app/__tests__/
+        - action: sync
+          path: jest.config.js
+          target: app/jest.config.js
+        - action: sync
+          path: jest.setup.js
+          target: app/jest.setup.js
     depends_on:
       mysql_db:
         condition: service_healthy

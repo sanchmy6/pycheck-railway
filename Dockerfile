@@ -6,21 +6,27 @@ WORKDIR /app
 
 #copy settings files to the current local directory of our docker image (/app)
 COPY package*.json ./
-COPY ./.env.template ./env
+COPY ./.env ./env
 COPY ./next.config.ts ./
 COPY ./postcss.config.mjs ./
 COPY ./tsconfig.json ./
 COPY ./entrypoint.sh ./
+RUN chmod +x ./entrypoint.sh
+COPY ./.swrc ./.swrc
+COPY ./jest.config.js ./jest.config.js
+COPY ./jest.setup.js ./jest.setup.js
 
 # Copy local directories to the current local directory of our docker image (/app)
 COPY ./src ./src
 COPY ./public ./public
 COPY ./prisma ./prisma
+COPY ./__tests__ ./__tests__
+COPY ./__mocks__ ./__mocks__
 
 RUN rm -rf ./.next
 
 RUN npm install \
-    && npm run build 
+    && npm run build
 
 EXPOSE 3000
 

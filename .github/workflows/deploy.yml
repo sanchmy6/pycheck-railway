@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # If your .env is committed, just copy it.
+      - name: Prepare .env
+        run: cp .env.template .env
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Start Services
+        run: docker compose up -d --build
+
+      - name: Wait for MySQL to be healthy
+        run: |
+          for i in {1..60}; do
+            if docker inspect --format '{{.State.Health.Status}}' mysql_db | grep healthy; then
+              echo "MySQL is healthy!"
+              break
+            else
+              echo "Waiting for MySQL... ($i/60)"
+              sleep 5
+            fi
+          done
+          docker ps
+          docker logs next_web
+          # for i in {1..60}; do
+          #   if docker inspect --format '{{.State.Status}}' next_web | grep healthy; then
+          #     echo "web is healthy!"
+          #     break
+          #   else
+          #     echo "Waiting for web... ($i/200)"
+          #     sleep 5
+          #   fi
+          #   if (($i % 20 == 0));then
+          #     docker ps
+          #   fi
+          # done
+          # # sleep 600 #additional time to complete prisma migration and whatever else
+
+      - name: Main container health check
+        run: docker ps
+
+      - name: Run tests in container
+        run: docker compose exec -T web npm test
+
+      # Tear down the stack
+      - name: Stop all containers
+        run: docker compose down --volumes
