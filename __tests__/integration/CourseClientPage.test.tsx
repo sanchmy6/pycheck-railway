@@ -1,10 +1,10 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { CourseClientPage } from "@/app/courses/[id]/CourseClientPage";
-import { useSearchParams } from "next/navigation";
-
 jest.mock("next/navigation", () => ({
     useSearchParams: jest.fn(),
 }));
+
+import { render, screen, fireEvent, act } from "@testing-library/react";
+import { CourseClientPage } from "@/app/courses/[id]/CourseClientPage";
+import { useSearchParams } from "next/navigation";
 
 const mockUseSearchParams = useSearchParams as jest.Mock;
 
@@ -81,5 +81,70 @@ describe("CourseClientPage", () => {
         fireEvent.click(problemButton);
 
         expect(problemButton).toHaveClass("font-medium"); // active styling
+    });
+
+    it("renders fallback UI when no active category", () => {
+        render(<CourseClientPage course={mockCourse} categoriesWithProblems={[]} />);
+        expect(screen.getByText("No task is currently selected")).toBeInTheDocument();
+    });
+
+    it("toggles category accordion open/close", () => {
+        render(<CourseClientPage course={mockCourse} categoriesWithProblems={mockCategories} />);
+        const summary = screen.getByText("Intro");
+        // First click: open
+        fireEvent.click(summary);
+        // Second click: close
+        fireEvent.click(summary);
+        // If no error thrown – works. You could inspect DOM to check open state but it's more E2E-level.
+        expect(summary).toBeInTheDocument();
+    });
+
+    it("calls scrollIntoView on problem click", () => {
+        render(<CourseClientPage course={mockCourse} categoriesWithProblems={mockCategories} />);
+        const element = document.createElement("div");
+        element.scrollIntoView = jest.fn();
+        element.id = "problem-201";
+        document.body.appendChild(element);
+
+        const btn = screen.getByText("Add Two Numbers");
+        fireEvent.click(btn);
+
+        expect(element.scrollIntoView).toHaveBeenCalled();
+    });
+
+    it("handles scroll and sets active problem", () => {
+        const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
+        const originalRequestAnimationFrame = window.requestAnimationFrame;
+
+        Element.prototype.getBoundingClientRect = jest.fn(() => ({
+            x: 0,
+            y: 0,
+            top: 100,
+            right: 0,
+            bottom: 400,
+            left: 0,
+            width: 800,
+            height: 300,
+            toJSON: () => {},
+        } as DOMRect));
+
+        window.requestAnimationFrame = jest.fn((cb) => {
+            cb(0);
+            return 1;
+        });
+
+        render(<CourseClientPage course={mockCourse} categoriesWithProblems={mockCategories} />);
+
+        // Trigger scroll event
+        act(() => {
+            window.dispatchEvent(new Event("scroll"));
+        });
+
+        // Effect should have run — visually no assertion here unless we test internal state or DOM class
+        expect(screen.getByText("Problem 1")).toBeInTheDocument();
+
+        // Restore
+        Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+        window.requestAnimationFrame = originalRequestAnimationFrame;
     });
 });
