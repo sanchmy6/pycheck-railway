@@ -10,6 +10,7 @@ const config = {
         '/node_modules/(?!react-syntax-highlighter)'
     ],
     moduleNameMapper: {
+        '^@/prisma$': '<rootDir>/src/lib/prisma.ts',
         '^@/(.*)$': '<rootDir>/src/$1',
         'react-syntax-highlighter': '<rootDir>/__mocks__/react-syntax-highlighter.js',
     },
