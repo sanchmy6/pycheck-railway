@@ -28,7 +28,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: ["./entrypoint.sh"]
+    command: ["sh", "./entrypoint.sh"]
     container_name: next_web
     ports:
       - '3000:3000'
