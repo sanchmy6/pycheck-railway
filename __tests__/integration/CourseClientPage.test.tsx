@@ -140,7 +140,7 @@ describe("CourseClientPage", () => {
             window.dispatchEvent(new Event("scroll"));
         });
 
-        // Effect should have run — visually no assertion here unless we test internal state or DOM class
+        // Effect should have run
         expect(screen.getByText("Problem 1")).toBeInTheDocument();
 
         // Restore

@@ -7,7 +7,7 @@ jest.mock("@/app/teacher/utils", () => ({
     notifyAuthStateChanged: jest.fn(),
 }));
 
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import Header from "@/components/Header";
 import * as authUtils from "@/app/teacher/utils";
 import { useRouter } from "next/navigation";
@@ -91,7 +91,9 @@ describe("Header", () => {
 
         expect(screen.getByText("Logged out successfully")).toBeInTheDocument();
 
-        jest.advanceTimersByTime(2000);
+        act(() => {
+            jest.advanceTimersByTime(2000);
+        });
 
         await waitFor(() => {
             expect(screen.queryByText("Logged out successfully")).not.toBeInTheDocument();
