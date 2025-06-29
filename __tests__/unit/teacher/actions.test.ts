@@ -15,7 +15,6 @@ import {
     updateCourseAction,
     createCategoryAction,
     getCategories,
-    getCoursesWithStats,
     createProblemAction,
     updateProblemAction,
     updateCategoryAction,

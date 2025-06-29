@@ -122,7 +122,7 @@ export default function TeacherLoginPage() {
               Enter the password to access the admin dashboard
             </p>
           </div>
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <form data-testid="teacher-login-form" className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Password
