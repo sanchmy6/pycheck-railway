@@ -49,6 +49,24 @@ export async function getProblemHint(problemId: number) {
   };
 }
 
+export async function getProblemSolution(problemId: number) {
+  const problem = await findProblemById(problemId);
+  if (!problem) return null;
+
+  const correctLines = problem.correct_lines.split(",").map(line => parseInt(line.trim()));
+  const reasons = problem.reason as Record<string, string>;
+
+  const correctSelections = correctLines.map(line => ({
+    line,
+    reason: reasons[line.toString()] || "This line contains an error."
+  }));
+
+  return {
+    correctLines,
+    correctSelections
+  };
+}
+
 export async function evaluateProblemSelection(problemId: number, selectedLines: number[]) {
   const problem = await findProblemById(problemId);
 
