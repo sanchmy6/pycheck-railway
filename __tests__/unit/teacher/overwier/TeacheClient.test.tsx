@@ -14,7 +14,7 @@ jest.mock("@/app/teacher/actions", () => ({
     deleteProblemAction: jest.fn(),
 }));
 
-import {render, screen, fireEvent, waitFor, within} from "@testing-library/react";
+import {render, screen, fireEvent, waitFor} from "@testing-library/react";
 import { TeacherClient } from "@/app/teacher/overview/TeacherClient";
 import * as actions from "@/app/teacher/actions";
 import { useRouter } from "next/navigation";
