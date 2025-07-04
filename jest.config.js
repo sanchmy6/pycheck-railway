@@ -5,7 +5,7 @@ const createJestConfig = nextJest({ dir: './' });
 /** @type {import('jest').Config} */
 const config = {
     setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-    testEnvironment: 'jest-environment-jsdom',
+    testEnvironment: 'jest-fixed-jsdom',
     transformIgnorePatterns: [
         '/node_modules/(?!react-syntax-highlighter)'
     ],
