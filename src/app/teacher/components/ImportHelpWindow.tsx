@@ -73,6 +73,7 @@ export function ImportHelpWindow({ isOpen, onClose }: ImportHelpWindowProps) {
                     <li>• If a problem with the same name exists in the same lecture, it will be updated</li>
                     <li>• If no matching problem exists, a new one will be created</li>
                     <li>• Courses and lectures are auto-created if they don&apos;t exist</li>
+                    <li>• <strong>New courses are automatically set to &quot;Private&quot; status</strong> for review before publishing</li>
                   </ul>
                 </div>
               </div>

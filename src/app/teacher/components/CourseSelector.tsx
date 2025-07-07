@@ -11,7 +11,7 @@ interface CourseSelectorProps {
   courses: Course[];
   selectedCourseId: string;
   onCourseChange: (courseId: string) => void;
-  onCreateCourse: (name: string, description: string) => Promise<{ success: boolean; course?: Course; error?: string }>;
+  onCreateCourse: (name: string, description: string, status?: "Active" | "Archived" | "Private") => Promise<{ success: boolean; course?: Course; error?: string }>;
 }
 
 export function CourseSelector({
@@ -23,6 +23,7 @@ export function CourseSelector({
   const [isCreating, setIsCreating] = useState(false);
   const [newCourseName, setNewCourseName] = useState("");
   const [newCourseDescription, setNewCourseDescription] = useState("");
+  const [newCourseStatus, setNewCourseStatus] = useState<"Active" | "Archived" | "Private">("Active");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -30,6 +31,7 @@ export function CourseSelector({
     setIsCreating(!isCreating);
     setNewCourseName("");
     setNewCourseDescription("");
+    setNewCourseStatus("Active");
     setError("");
     if (!isCreating) {
       onCourseChange("");
@@ -66,13 +68,14 @@ export function CourseSelector({
     setError("");
 
     try {
-      const result = await onCreateCourse(newCourseName.trim(), newCourseDescription.trim());
+      const result = await onCreateCourse(newCourseName.trim(), newCourseDescription.trim(), newCourseStatus);
       
       if (result.success && result.course) {
         onCourseChange(result.course.id.toString());
         setIsCreating(false);
         setNewCourseName("");
         setNewCourseDescription("");
+        setNewCourseStatus("Active");
       } else {
         setError(result.error || "Failed to create course");
       }
@@ -145,6 +148,16 @@ export function CourseSelector({
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:opacity-50"
             placeholder="Enter course description..."
           />
+          <select
+            value={newCourseStatus}
+            onChange={(e) => setNewCourseStatus(e.target.value as "Active" | "Archived" | "Private")}
+            disabled={isSubmitting}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:opacity-50"
+          >
+            <option value="Active">Active</option>
+            <option value="Archived">Archived</option>
+            <option value="Private">Private</option>
+          </select>
           <button
             type="button"
             onClick={handleCreateSubmit}

@@ -27,6 +27,7 @@ async function seedCourses() {
     data: {
       name: "CNN",
       description: "Convolutional Neural Networks: Deep learning for computer vision, image recognition, and spatial data processing",
+      status: "Active",
     },
   });
 
@@ -34,18 +35,36 @@ async function seedCourses() {
     data: {
       name: "ANN",
       description: "Artificial Neural Networks: Fundamentals of neural network architectures, backpropagation, and machine learning",
+      status: "Active",
     },
   });
 
-  console.log("Created courses:", { course1, course2 });
+  // Create additional courses with different statuses
+  const course3 = await prisma.course.create({
+    data: {
+      name: "RNN",
+      description: "Recurrent Neural Networks: Sequential data processing, LSTM, GRU, and time series analysis",
+      status: "Private",
+    },
+  });
 
-  return { course1, course2 };
+  const course4 = await prisma.course.create({
+    data: {
+      name: "Deep Learning Fundamentals",
+      description: "Introduction to deep learning concepts, architectures, and applications - archived for reference",
+      status: "Archived",
+    },
+  });
+
+  console.log("Created courses:", { course1, course2, course3, course4 });
+
+  return { course1, course2, course3, course4 };
 }
 
 async function seedCategories(courses: any) {
-  const { course1, course2 } = courses
+  const { course1, course2, course3, course4 } = courses
 
-  // Create categories for CNN course
+  // Create categories for CNN course (Active)
   const category1 = await prisma.category.create({
     data: {
       name: "Lecture 1: Introduction to Convolutional Layers",
@@ -60,7 +79,7 @@ async function seedCategories(courses: any) {
     },
   });
 
-  // Create categories for ANN course
+  // Create categories for ANN course (Active)
   const category3 = await prisma.category.create({
     data: {
       name: "Lecture 1: Neural Network Fundamentals",
@@ -75,13 +94,43 @@ async function seedCategories(courses: any) {
     },
   });
 
-  console.log("Created categories:", { category1, category2, category3, category4 });
+  // Create categories for RNN course (Private)
+  const category5 = await prisma.category.create({
+    data: {
+      name: "Lecture 1: RNN Basics and Applications",
+      courseId: course3.id,
+    },
+  });
 
-  return { category1, category2, category3, category4 };
+  const category6 = await prisma.category.create({
+    data: {
+      name: "Lecture 2: LSTM and GRU Networks",
+      courseId: course3.id,
+    },
+  });
+
+  // Create categories for Deep Learning Fundamentals course (Archived)
+  const category7 = await prisma.category.create({
+    data: {
+      name: "Lecture 1: Introduction to Deep Learning",
+      courseId: course4.id,
+    },
+  });
+
+  const category8 = await prisma.category.create({
+    data: {
+      name: "Lecture 2: Neural Network Architectures",
+      courseId: course4.id,
+    },
+  });
+
+  console.log("Created categories:", { category1, category2, category3, category4, category5, category6, category7, category8 });
+
+  return { category1, category2, category3, category4, category5, category6, category7, category8 };
 }
 
 async function seedProblems(categories: any) {
-  const { category1, category2, category3, category4 } = categories;
+  const { category1, category2, category3, category4, category5, category6, category7, category8 } = categories;
 
   // Create problems
   const problem1 = await prisma.problem.create({
@@ -254,7 +303,146 @@ def softmax(x):
     },
   });
 
-  console.log("Created problems:", { problem1, problem2, bubbleSortProblem, neuronProblem, backpropProblem, activationProblem });
+  // Create problems for RNN course (Private)
+  const rnnProblem = await prisma.problem.create({
+    data: {
+      name: "Simple RNN Implementation",
+      description: "Find the errors in this basic RNN cell implementation for sequence processing.",
+      categoryId: category5.id,
+      code_snippet: `import numpy as np
+
+def rnn_cell(input_t, hidden_t_minus_1, W_input, W_hidden, bias):
+    # Compute hidden state
+    hidden_t = np.tanh(W_input @ input_t + W_hidden @ hidden_t_minus_1 + bias)
+    
+    # Output is the same as hidden state in simple RNN
+    output_t = hidden_t
+    
+    return output_t, hidden_t
+
+def rnn_forward(inputs, initial_hidden, W_input, W_hidden, bias):
+    hidden_states = []
+    outputs = []
+    
+    hidden_t = initial_hidden
+    
+    for t in range(len(inputs)):
+        output_t, hidden_t = rnn_cell(inputs[t], hidden_t, W_input, W_hidden, bias)
+        outputs.append(output_t)
+        hidden_states.append(hidden_t)
+    
+    return outputs, hidden_states`,
+      correct_lines: "",
+      reason: {},
+      hint: "This is a correct implementation of a simple RNN. Look for proper matrix operations and state propagation.",
+    },
+  });
+
+  const lstmProblem = await prisma.problem.create({
+    data: {
+      name: "LSTM Gates",
+      description: "Identify the errors in this LSTM gate implementation.",
+      categoryId: category6.id,
+      code_snippet: `import numpy as np
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def lstm_cell(input_t, hidden_t_minus_1, cell_t_minus_1, W_f, W_i, W_o, W_g, b_f, b_i, b_o, b_g):
+    # Forget gate
+    forget_gate = sigmoid(W_f @ input_t + W_f @ hidden_t_minus_1 + b_f)
+    
+    # Input gate
+    input_gate = sigmoid(W_i @ input_t + W_i @ hidden_t_minus_1 + b_i)
+    
+    # Candidate values
+    candidate = np.tanh(W_g @ input_t + W_g @ hidden_t_minus_1 + b_g)
+    
+    # Cell state
+    cell_t = forget_gate * cell_t_minus_1 + input_gate + candidate
+    
+    # Output gate
+    output_gate = sigmoid(W_o @ input_t + W_o @ hidden_t_minus_1 + b_o)
+    
+    # Hidden state
+    hidden_t = output_gate * np.tanh(cell_t)
+    
+    return hidden_t, cell_t`,
+      correct_lines: "8,11,16",
+      reason: {
+        "8": "Error: Using W_f twice. Should use different weight matrices: W_f @ input_t + U_f @ hidden_t_minus_1 + b_f",
+        "11": "Error: Using W_i twice. Should use different weight matrices: W_i @ input_t + U_i @ hidden_t_minus_1 + b_i",
+        "16": "Error: Missing multiplication for candidate. Should be: forget_gate * cell_t_minus_1 + input_gate * candidate"
+      },
+      hint: "Check the LSTM gate equations and ensure proper weight matrices and operations are used.",
+    },
+  });
+
+  // Create problems for Deep Learning Fundamentals course (Archived)
+  const gradientProblem = await prisma.problem.create({
+    data: {
+      name: "Gradient Calculation",
+      description: "Find the errors in this basic gradient calculation for a simple neural network.",
+      categoryId: category7.id,
+      code_snippet: `import numpy as np
+
+def forward_pass(x, w1, b1, w2, b2):
+    # First layer
+    z1 = np.dot(x, w1) + b1
+    a1 = 1 / (1 + np.exp(-z1))  # sigmoid
+    
+    # Second layer
+    z2 = np.dot(a1, w2) + b2
+    a2 = 1 / (1 + np.exp(-z2))  # sigmoid
+    
+    return a2, a1, z1, z2
+
+def backward_pass(x, y, a2, a1, z1, z2, w2):
+    # Output layer gradient
+    dz2 = a2 - y
+    dw2 = np.dot(a1.T, dz2)
+    db2 = np.sum(dz2, axis=0, keepdims=True)
+    
+    # Hidden layer gradient
+    da1 = np.dot(dz2, w2.T)
+    dz1 = da1 * a1 * (1 + a1)  # sigmoid derivative
+    
+    return dz1, dw2, db2`,
+      correct_lines: "22",
+      reason: {
+        "22": "Error: Incorrect sigmoid derivative. Should be a1 * (1 - a1), not a1 * (1 + a1)."
+      },
+      hint: "Check the derivative of the sigmoid activation function.",
+    },
+  });
+
+  const optimizationProblem = await prisma.problem.create({
+    data: {
+      name: "Learning Rate Scheduling",
+      description: "Find the errors in this learning rate scheduling implementation.",
+      categoryId: category8.id,
+      code_snippet: `def exponential_decay(initial_lr, decay_rate, step):
+    return initial_lr * (decay_rate ** step)
+
+def step_decay(initial_lr, drop_rate, epochs_drop, epoch):
+    return initial_lr * (drop_rate ** (epoch // epochs_drop))
+
+def cosine_annealing(initial_lr, T_max, epoch):
+    import math
+    return initial_lr * (1 - math.cos(math.pi * epoch / T_max)) / 2
+
+def polynomial_decay(initial_lr, decay_steps, power, step):
+    return initial_lr * (1 + step / decay_steps) ** (-power)`,
+      correct_lines: "9,12",
+      reason: {
+        "9": "Error: Incorrect cosine annealing formula. Should be: initial_lr * (1 + math.cos(math.pi * epoch / T_max)) / 2",
+        "12": "Error: Incorrect polynomial decay formula. Should be: initial_lr * (1 - step / decay_steps) ** power"
+      },
+      hint: "Check the mathematical formulas for cosine annealing and polynomial decay scheduling.",
+    },
+  });
+
+  console.log("Created problems:", { problem1, problem2, bubbleSortProblem, neuronProblem, backpropProblem, activationProblem, rnnProblem, lstmProblem, gradientProblem, optimizationProblem });
 }
 
 main()

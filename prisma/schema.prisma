@@ -13,15 +13,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum CourseStatus {
+  Active
+  Archived
+  Private
+}
+
 model Course {
-  id          Int        @id @default(autoincrement())
-  name        String     @unique
-  description String     @db.Text
-  created_at  DateTime   @default(now())
-  updated_at  DateTime   @updatedAt
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  description String       @db.Text
+  status      CourseStatus @default(Active)
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
   categories  Category[]
 
   @@index([name])
+  @@index([status])
 }
 
 model Category {

@@ -4,11 +4,9 @@ PyCheck is a web application built with next.js and MySQL that provides an inter
 
 ## System Requirements
 
-- Node.js
-- MySQL
-- Docker (with Docker Compose)
-
-Check the `package.json` for the exact versions.
+- [Node.js](https://nodejs.org/) (18.x or higher)
+- [MySQL](https://www.mysql.com/) (8.3 or higher)
+- [Docker](https://www.docker.com/) (24.x or higher) with Docker Compose (v2.x or higher)
 
 ## Quick Start
 
@@ -70,7 +68,15 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ### Database
 
-To add new models to the database, update/extend the `schema.prisma` file and create a new migration for your changes.
+PyCheck uses [Prisma](https://www.prisma.io/) as its database toolkit and ORM (Object-Relational Mapping). Prisma provides type-safe database access, automatic migrations, and an intuitive data modeling language that makes database development both productive and reliable.
+
+#### Database Schema Development
+
+To add new models or modify existing ones in the database:
+
+1. **Update the schema**: Edit the `schema.prisma` file located in the `prisma/` directory to define your data models, relationships, and database structure.
+
+2. **Create a migration**: Generate a new migration file that captures your schema changes and can be applied to update the database structure.
 
 Create a new migration:
 
@@ -78,11 +84,40 @@ Create a new migration:
 npx prisma migrate dev --name <your_migration_name>
 ```
 
+3. **Apply the migration**: Deploy your changes to the database.
+
 Apply the migration:
 
 ```bash
 npx prisma migrate dev
 ```
+
+4. **Regenerate the client**: After schema changes, regenerate the Prisma client to get updated TypeScript types and database access methods:
+
+```bash
+npx prisma generate
+```
+
+#### Additional Database Operations
+
+- **View your data**: Use Prisma Studio to browse and edit your data in a web-based GUI:
+
+  ```bash
+  npx prisma studio
+  ```
+
+- **Reset the database**: If you need to reset your development database:
+
+  ```bash
+  npx prisma migrate reset
+  ```
+
+- **Deploy to production**: For production environments, use:
+  ```bash
+  npx prisma migrate deploy
+  ```
+
+For more advanced database operations and best practices, refer to the [Prisma documentation](https://www.prisma.io/docs/).
 
 ## Production Setup with Docker
 
@@ -168,3 +203,15 @@ In a separate terminal, run:
 ```bash
 docker compose watch
 ```
+
+## Credits
+
+### Core Contributors
+
+- **[cankoeks](https://github.com/cankoeks)**
+- **[Buhaiev](https://github.com/Buhaiev)**
+- **[OlhaBorysova](https://github.com/OlhaBorysova)**
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

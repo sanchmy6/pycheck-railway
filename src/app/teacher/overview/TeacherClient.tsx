@@ -4,13 +4,14 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { BackButton } from "@/components/BackButton";
-import { deleteCourseAction, deleteCategoryAction, deleteProblemAction, importProblems, getCoursesWithStats } from "../actions";
+import { deleteCourseAction, deleteCategoryAction, deleteProblemAction, importProblems, getCoursesWithStats, updateCourseStatusAction } from "../actions";
 import { ImportHelpWindow } from "../components/ImportHelpWindow";
 
 interface Course {
   id: number;
   name: string;
   description?: string;
+  status: "Active" | "Archived" | "Private";
   _count: {
     categories: number;
   };
@@ -48,6 +49,7 @@ export function TeacherClient({ initialCourses }: TeacherClientProps) {
   const [deleteError, setDeleteError] = useState("");
   const [isImporting, setIsImporting] = useState(false);
   const [showImportHelp, setShowImportHelp] = useState(false);
+  const [changingStatus, setChangingStatus] = useState<number | null>(null);
   const [importResult, setImportResult] = useState<{
     success: boolean;
     error?: string;
@@ -62,6 +64,19 @@ export function TeacherClient({ initialCourses }: TeacherClientProps) {
   } | null>(null);
 
   const router = useRouter();
+
+  const getStatusBadgeStyles = (status: "Active" | "Archived" | "Private") => {
+    switch (status) {
+      case "Active":
+        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+      case "Archived":
+        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400";
+      case "Private":
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400";
+    }
+  };
 
   useEffect(() => {
     if (initialCourses.length > 0) {
@@ -100,6 +115,28 @@ export function TeacherClient({ initialCourses }: TeacherClientProps) {
 
   const toggleCategory = (categoryId: number) => {
     setExpandedCategory(expandedCategory === categoryId ? null : categoryId);
+  };
+
+  const handleStatusChange = async (courseId: number, newStatus: "Active" | "Archived" | "Private") => {
+    setChangingStatus(courseId);
+    
+    const authToken = sessionStorage.getItem("teacher_token") || "";
+    
+    try {
+      const result = await updateCourseStatusAction(authToken, courseId, newStatus);
+      
+      if (result.success) {
+        setCourses(prev => prev.map(course => 
+          course.id === courseId ? { ...course, status: newStatus } : course
+        ));
+      } else {
+        console.error("Failed to update status:", result.error);
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+    } finally {
+      setChangingStatus(null);
+    }
   };
 
   const handleDelete = async () => {
@@ -215,7 +252,7 @@ export function TeacherClient({ initialCourses }: TeacherClientProps) {
               <button
                 onClick={() => setShowImportHelp(true)}
                 className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
-                title="Import Help"
+                title="Import Help - New courses are automatically set to Private status"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -269,6 +306,9 @@ export function TeacherClient({ initialCourses }: TeacherClientProps) {
                             </svg>
                             {course.name}
                           </button>
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeStyles(course.status)}`}>
+                            {course.status}
+                          </span>
                         </div>
                         {course.description && (
                           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 ml-7">
@@ -291,6 +331,16 @@ export function TeacherClient({ initialCourses }: TeacherClientProps) {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
+                        <select
+                          value={course.status}
+                          onChange={(e) => handleStatusChange(course.id, e.target.value as "Active" | "Archived" | "Private")}
+                          disabled={changingStatus === course.id}
+                          className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                        >
+                          <option value="Active">Active</option>
+                          <option value="Archived">Archived</option>
+                          <option value="Private">Private</option>
+                        </select>
                         <Link
                           href={`/teacher/edit/course/${course.id}`}
                           className="px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"

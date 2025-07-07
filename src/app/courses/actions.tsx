@@ -1,9 +1,17 @@
 "use server";
 
-import {findCourseById, queryCategoriesByCourseId, queryCourses, queryProblemsByCategoryId, findProblemById} from "@/lib/db/db-helpers";
+import {findCourseById, queryCategoriesByCourseId, queryCourses, queryActiveCourses, queryArchivedCourses, queryProblemsByCategoryId, findProblemById} from "@/lib/db/db-helpers";
 
 export async function getCourses() {
   return await queryCourses();
+}
+
+export async function getActiveCourses() {
+  return await queryActiveCourses();
+}
+
+export async function getArchivedCourses() {
+  return await queryArchivedCourses();
 }
 
 export async function getCourseById(id: string) {
@@ -46,6 +54,24 @@ export async function getProblemHint(problemId: number) {
 
   return {
     hint: problem.hint
+  };
+}
+
+export async function getProblemSolution(problemId: number) {
+  const problem = await findProblemById(problemId);
+  if (!problem) return null;
+
+  const correctLines = problem.correct_lines.split(",").map(line => parseInt(line.trim()));
+  const reasons = problem.reason as Record<string, string>;
+
+  const correctSelections = correctLines.map(line => ({
+    line,
+    reason: reasons[line.toString()] || "This line contains an error."
+  }));
+
+  return {
+    correctLines,
+    correctSelections
   };
 }
 

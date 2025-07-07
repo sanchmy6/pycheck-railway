@@ -23,6 +23,7 @@ describe("actions.ts", () => {
                 id: 1,
                 name: "Course 1",
                 description: "Desc",
+                status: "Active",
                 created_at: new Date(),
                 updated_at: new Date(),
             },
@@ -33,6 +34,7 @@ describe("actions.ts", () => {
                 id: 1,
                 name: "Course 1",
                 description: "Desc",
+                status: "Active",
                 created_at: expect.any(Date),
                 updated_at: expect.any(Date),
             },
@@ -44,6 +46,7 @@ describe("actions.ts", () => {
             id: 42,
             name: "Course 42",
             description: "Desc",
+            status: "Active",
             created_at: new Date(),
             updated_at: new Date(),
         });
@@ -53,6 +56,7 @@ describe("actions.ts", () => {
             id: 42,
             name: "Course 42",
             description: "Desc",
+            status: "Active",
             created_at: expect.any(Date),
             updated_at: expect.any(Date),
         });

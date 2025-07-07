@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { evaluateProblemSelection, getProblemById, getProblemHint } from "../actions";
+import { evaluateProblemSelection, getProblemById, getProblemHint, getProblemSolution } from "../actions";
 
 interface CodeSnippetProps {
   code: string;
@@ -30,7 +30,6 @@ interface EvaluationResult {
 export function CodeSnippet({ code, problemId, language = "python", problemData }: CodeSnippetProps) {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [selectedLines, setSelectedLines] = useState<number[]>([]);
-  const [evaluationResult, setEvaluationResult] = useState<EvaluationResult | null>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [expectedLinesCount, setExpectedLinesCount] = useState<number>(0);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -39,6 +38,13 @@ export function CodeSnippet({ code, problemId, language = "python", problemData 
   const [showHint, setShowHint] = useState(false);
   const [hint, setHint] = useState<string>("");
   const [isLoadingHint, setIsLoadingHint] = useState(false);
+  const [hasFailedAttempt, setHasFailedAttempt] = useState(false);
+  const [showSolution, setShowSolution] = useState(false);
+  const [solutionData, setSolutionData] = useState<{
+    correctLines: number[];
+    correctSelections: Array<{ line: number; reason: string }>;
+  } | null>(null);
+  const [isLoadingSolution, setIsLoadingSolution] = useState(false);
 
   useEffect(() => {
     const theme = document.documentElement.getAttribute("data-theme");
@@ -95,6 +101,12 @@ export function CodeSnippet({ code, problemId, language = "python", problemData 
       const result = await evaluateProblemSelection(problemId, selectedLines);
       setFeedback(result);
       setShowFeedback(true);
+      setHasSubmitted(true);
+      
+      // Track failed attempts
+      if (!result.isCorrect) {
+        setHasFailedAttempt(true);
+      }
     } catch {
       setFeedback({
         success: false,
@@ -102,6 +114,8 @@ export function CodeSnippet({ code, problemId, language = "python", problemData 
         message: "An error occurred while evaluating your selection. Please try again."
       });
       setShowFeedback(true);
+      setHasSubmitted(true);
+      setHasFailedAttempt(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -109,8 +123,36 @@ export function CodeSnippet({ code, problemId, language = "python", problemData 
 
   const handleReset = () => {
     setSelectedLines([]);
-    setEvaluationResult(null);
     setHasSubmitted(false);
+    setHasFailedAttempt(false);
+    setShowSolution(false);
+    setShowFeedback(false);
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedLines([]);
+  };
+
+  const handleShowSolution = async () => {
+    if (showSolution) {
+      setShowSolution(false);
+      return;
+    }
+
+    if (!solutionData) {
+      setIsLoadingSolution(true);
+      try {
+        const solution = await getProblemSolution(problemId);
+        if (solution) {
+          setSolutionData(solution);
+        }
+      } catch (error) {
+        console.error("Failed to load solution:", error);
+      } finally {
+        setIsLoadingSolution(false);
+      }
+    }
+    setShowSolution(true);
   };
 
   const handleHintClick = async () => {
@@ -140,24 +182,32 @@ export function CodeSnippet({ code, problemId, language = "python", problemData 
   };
 
   const getLineBackgroundColor = (lineNumber: number) => {
+    // Highlight solution lines in blue
+    if (showSolution && solutionData?.correctLines.includes(lineNumber)) {
+      return isDarkMode ? "#1e40af" : "#dbeafe";
+    }
+
     if (!hasSubmitted) {
       return selectedLines.includes(lineNumber)
         ? (isDarkMode ? "#2d3748" : "#e2e8f0")
         : "transparent";
     }
 
-    if (evaluationResult?.isCorrect && selectedLines.includes(lineNumber)) {
-      return isDarkMode ? "#065f46" : "#dcfce7";
+    if (selectedLines.includes(lineNumber)) {
+      // Check if it was correctly selected
+      const correctLine = feedback?.correctSelections?.find(sel => sel.line === lineNumber);
+      if (correctLine) {
+        return isDarkMode ? "#065f46" : "#dcfce7"; // Green for correct
+      }
+      
+      // Check if it was incorrectly selected
+      const incorrectLine = feedback?.incorrectSelections?.find(sel => sel.line === lineNumber);
+      if (incorrectLine) {
+        return isDarkMode ? "#7f1d1d" : "#fef2f2"; // Red for incorrect
+      }
     }
 
-    const incorrectLine = evaluationResult?.incorrectSelections?.find(sel => sel.line === lineNumber);
-    if (incorrectLine) {
-      return isDarkMode ? "#7f1d1d" : "#fef2f2";
-    }
-
-    return selectedLines.includes(lineNumber)
-      ? (isDarkMode ? "#065f46" : "#dcfce7")
-      : "transparent";
+    return "transparent";
   };
 
   const getLineProps = (lineNumber: number) => {
@@ -213,7 +263,7 @@ export function CodeSnippet({ code, problemId, language = "python", problemData 
           )}
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <button
             onClick={handleHintClick}
             disabled={isLoadingHint}
@@ -222,20 +272,40 @@ export function CodeSnippet({ code, problemId, language = "python", problemData 
             {isLoadingHint ? "Loading..." : showHint ? "Hide Hint" : "💡 Show Hint"}
           </button>
 
+          {hasFailedAttempt && (
+            <button
+              onClick={handleShowSolution}
+              disabled={isLoadingSolution}
+              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoadingSolution ? "Loading..." : showSolution ? "Hide Solution" : "🔍 Show Solution"}
+            </button>
+          )}
+
           {!hasSubmitted ? (
-            canSubmit ? (
-              <button
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? "Evaluating..." : "Submit Selection"}
-              </button>
-            ) : (
-              <div className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-400 bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-500">
-                Select {expectedLinesCount} lines to submit
-              </div>
-            )
+            <>
+              {selectedLines.length > 0 && (
+                <button
+                  onClick={handleDeselectAll}
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
+                >
+                  Deselect All
+                </button>
+              )}
+              {canSubmit ? (
+                <button
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? "Evaluating..." : "Submit Selection"}
+                </button>
+              ) : (
+                <div className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-400 bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-500">
+                  Select {expectedLinesCount} lines to submit
+                </div>
+              )}
+            </>
           ) : (
             <button
               onClick={handleReset}
@@ -311,6 +381,33 @@ export function CodeSnippet({ code, problemId, language = "python", problemData 
                 <h3 className="text-sm font-medium">Hint</h3>
                 <div className="mt-1 text-sm">
                   {problemData?.hint || hint}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSolution && solutionData && (
+        <div className="mt-4">
+          <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium">Solution</h3>
+                <div className="mt-2 text-sm">
+                  <div className="mb-2">The correct lines are highlighted in blue above. Here&apos;s why each line is part of the solution:</div>
+                  <ul className="list-disc list-inside space-y-1">
+                    {solutionData.correctSelections.map(sel => (
+                      <li key={sel.line} className="text-sm">
+                        <span className="font-medium">Line {sel.line}:</span> {sel.reason}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             </div>
