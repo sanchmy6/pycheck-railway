@@ -211,3 +211,7 @@ docker compose watch
 - **[cankoeks](https://github.com/cankoeks)**
 - **[Buhaiev](https://github.com/Buhaiev)**
 - **[OlhaBorysova](https://github.com/OlhaBorysova)**
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
