@@ -127,7 +127,7 @@ describe("CourseSelector", () => {
         fireEvent.click(screen.getByRole("button", { name: /Create Course/i }));
 
         await waitFor(() => {
-            expect(mockOnCreateCourse).toHaveBeenCalledWith("My Course", "This is a great course.");
+            expect(mockOnCreateCourse).toHaveBeenCalledWith("My Course", "This is a great course.", "Active");
             expect(mockOnCourseChange).toHaveBeenCalledWith("3");
         });
     });

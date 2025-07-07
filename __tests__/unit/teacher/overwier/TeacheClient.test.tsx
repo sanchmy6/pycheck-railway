@@ -26,6 +26,7 @@ describe("TeacherClient", () => {
             id: 1,
             name: "Course A",
             description: "Desc A",
+            status: "Active" as const,
             _count: { categories: 1 },
             categories: [
                 {
@@ -81,7 +82,7 @@ describe("TeacherClient", () => {
 
     it("opens and closes import help window", () => {
         render(<TeacherClient initialCourses={dummyCourses} />);
-        fireEvent.click(screen.getByTitle("Import Help"));
+        fireEvent.click(screen.getByTitle("Import Help - New courses are automatically set to Private status"));
         expect(screen.getByTestId("import-help-window")).toBeInTheDocument();
     });
 
