@@ -96,7 +96,8 @@ export async function importProblems(authToken: string) {
         if (!course) {
           const courseResult = await createCourse({ 
             name: problemData.courseName.trim(), 
-            description: ""
+            description: "",
+            status: "Private"
           });
           course = courseResult;
           if (!existingCourses.has(problemData.courseName.toLowerCase())) {

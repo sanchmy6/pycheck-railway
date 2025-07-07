@@ -30,7 +30,6 @@ interface EvaluationResult {
 export function CodeSnippet({ code, problemId, language = "python", problemData }: CodeSnippetProps) {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [selectedLines, setSelectedLines] = useState<number[]>([]);
-  const [evaluationResult, setEvaluationResult] = useState<EvaluationResult | null>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [expectedLinesCount, setExpectedLinesCount] = useState<number>(0);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -124,7 +123,6 @@ export function CodeSnippet({ code, problemId, language = "python", problemData 
 
   const handleReset = () => {
     setSelectedLines([]);
-    setEvaluationResult(null);
     setHasSubmitted(false);
     setHasFailedAttempt(false);
     setShowSolution(false);
@@ -402,7 +400,7 @@ export function CodeSnippet({ code, problemId, language = "python", problemData 
               <div className="ml-3">
                 <h3 className="text-sm font-medium">Solution</h3>
                 <div className="mt-2 text-sm">
-                  <div className="mb-2">The correct lines are highlighted in blue above. Here's why each line is part of the solution:</div>
+                  <div className="mb-2">The correct lines are highlighted in blue above. Here&apos;s why each line is part of the solution:</div>
                   <ul className="list-disc list-inside space-y-1">
                     {solutionData.correctSelections.map(sel => (
                       <li key={sel.line} className="text-sm">

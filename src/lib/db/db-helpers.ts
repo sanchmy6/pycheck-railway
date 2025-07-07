@@ -26,21 +26,42 @@ export async function findCourseById(id: number) {
   });
 }
 
-export async function createCourse(data: { name: string; description: string }) {
+export async function createCourse(data: { name: string; description: string; status?: "Active" | "Archived" | "Private" }) {
   return await prisma.course.create({
     data,
   });
 }
 
-export async function updateCourse(id: number, data: { name: string; description: string }) {
+export async function updateCourse(id: number, data: { name: string; description: string; status?: "Active" | "Archived" | "Private" }) {
   return await prisma.course.update({
     where: { id },
     data,
   });
 }
 
+export async function updateCourseStatus(id: number, status: "Active" | "Archived" | "Private") {
+  return await prisma.course.update({
+    where: { id },
+    data: { status },
+  });
+}
+
 export async function queryCourses() {
   return await prisma.course.findMany({
+    orderBy: { id: "asc" },
+  });
+}
+
+export async function queryActiveCourses() {
+  return await prisma.course.findMany({
+    where: { status: "Active" },
+    orderBy: { id: "asc" },
+  });
+}
+
+export async function queryArchivedCourses() {
+  return await prisma.course.findMany({
+    where: { status: "Archived" },
     orderBy: { id: "asc" },
   });
 }

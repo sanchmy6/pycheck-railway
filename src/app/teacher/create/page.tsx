@@ -110,8 +110,8 @@ export default function CreateProblemPage() {
     return result;
   };
 
-  const handleCreateCourse = async (name: string, description: string) => {
-    const result = await createCourseAction(authToken, name, description);
+  const handleCreateCourse = async (name: string, description: string, status: "Active" | "Archived" | "Private" = "Active") => {
+    const result = await createCourseAction(authToken, name, description, status);
     
     if (result.success && result.course) {
       setCourses(prev => [...prev, result.course!]);

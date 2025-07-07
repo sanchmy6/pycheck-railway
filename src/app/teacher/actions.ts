@@ -1,7 +1,7 @@
 "use server";
 
 import { verifyTeacherPassword, generateAuthToken, verifyAuthToken } from "@/lib/auth";
-import { createProblem, queryCategories, queryCourses, queryCategoriesByCourseId, createCategory, createCourse, updateCourse, updateCategory, updateProblem, findCourseById, findCategoryById, findProblemById, queryCoursesWithBasicStats, queryCategoriesWithProblemsForCourse, findProblemWithCategoryAndCourse, findCategoryWithCourse, queryCoursesWithCompleteData, deleteCourse, deleteCategory, deleteProblem } from "@/lib/db/db-helpers";
+import { createProblem, queryCategories, queryCourses, queryCategoriesByCourseId, createCategory, createCourse, updateCourse, updateCourseStatus, updateCategory, updateProblem, findCourseById, findCategoryById, findProblemById, queryCoursesWithBasicStats, queryCategoriesWithProblemsForCourse, findProblemWithCategoryAndCourse, findCategoryWithCourse, queryCoursesWithCompleteData, deleteCourse, deleteCategory, deleteProblem } from "@/lib/db/db-helpers";
 import { revalidatePath } from "next/cache";
 import { importProblems } from "./import-actions";
 import { isUniqueConstraintError, isForeignKeyConstraintError } from "./utils";
@@ -47,13 +47,13 @@ export async function getCategoriesByCourse(courseId: number) {
   return await queryCategoriesByCourseId(courseId);
 }
 
-export async function createCourseAction(authToken: string, name: string, description: string) {
+export async function createCourseAction(authToken: string, name: string, description: string, status: "Active" | "Archived" | "Private" = "Active") {
   if (!verifyAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
   try {
-    const course = await createCourse({ name, description });
+    const course = await createCourse({ name, description, status });
     return { success: true, course };
   } catch (error: unknown) {
     if (isUniqueConstraintError(error)) {
@@ -133,13 +133,18 @@ export async function createProblemAction(
   }
 }
 
-export async function updateCourseAction(authToken: string, id: number, name: string, description: string) {
+export async function updateCourseAction(authToken: string, id: number, name: string, description: string, status?: "Active" | "Archived" | "Private") {
   if (!verifyAuthToken(authToken)) {
     return { success: false, error: "Invalid authentication" };
   }
 
   try {
-    const course = await updateCourse(id, { name, description });
+    const updateData: { name: string; description: string; status?: "Active" | "Archived" | "Private" } = { name, description };
+    if (status) {
+      updateData.status = status;
+    }
+    
+    const course = await updateCourse(id, updateData);
     revalidatePath("/teacher/overview");
     revalidatePath("/courses");
     return { success: true, course };
@@ -148,6 +153,21 @@ export async function updateCourseAction(authToken: string, id: number, name: st
       return { success: false, error: "A course with this name already exists" };
     }
     return { success: false, error: "Failed to update course. Please try again." };
+  }
+}
+
+export async function updateCourseStatusAction(authToken: string, id: number, status: "Active" | "Archived" | "Private") {
+  if (!verifyAuthToken(authToken)) {
+    return { success: false, error: "Invalid authentication" };
+  }
+
+  try {
+    const course = await updateCourseStatus(id, status);
+    revalidatePath("/teacher/overview");
+    revalidatePath("/courses");
+    return { success: true, course };
+  } catch {
+    return { success: false, error: "Failed to update course status. Please try again." };
   }
 }
 

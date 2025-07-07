@@ -1,9 +1,17 @@
 "use server";
 
-import {findCourseById, queryCategoriesByCourseId, queryCourses, queryProblemsByCategoryId, findProblemById} from "@/lib/db/db-helpers";
+import {findCourseById, queryCategoriesByCourseId, queryCourses, queryActiveCourses, queryArchivedCourses, queryProblemsByCategoryId, findProblemById} from "@/lib/db/db-helpers";
 
 export async function getCourses() {
   return await queryCourses();
+}
+
+export async function getActiveCourses() {
+  return await queryActiveCourses();
+}
+
+export async function getArchivedCourses() {
+  return await queryArchivedCourses();
 }
 
 export async function getCourseById(id: string) {

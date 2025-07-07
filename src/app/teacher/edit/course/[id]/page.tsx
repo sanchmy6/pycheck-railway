@@ -13,7 +13,8 @@ export default function EditCoursePage() {
   
   const [formData, setFormData] = useState({
     name: "",
-    description: ""
+    description: "",
+    status: "Active" as "Active" | "Archived" | "Private"
   });
   
   const [error, setError] = useState("");
@@ -39,7 +40,8 @@ export default function EditCoursePage() {
         if (result.success && result.course) {
           setFormData({
             name: result.course.name,
-            description: result.course.description || ""
+            description: result.course.description || "",
+            status: result.course.status || "Active"
           });
         } else {
           setError(result.error || "Failed to load course");
@@ -91,7 +93,8 @@ export default function EditCoursePage() {
         authToken, 
         courseId, 
         formData.name.trim(), 
-        formData.description.trim()
+        formData.description.trim(),
+        formData.status
       );
 
       if (result.success) {
@@ -186,6 +189,23 @@ export default function EditCoursePage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     placeholder="Describe the course..."
                   />
+                </div>
+
+                <div>
+                  <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Status *
+                  </label>
+                  <select
+                    id="status"
+                    required
+                    value={formData.status}
+                    onChange={(e) => handleInputChange("status", e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Archived">Archived</option>
+                    <option value="Private">Private</option>
+                  </select>
                 </div>
               </div>
 
