@@ -5,11 +5,12 @@ const createJestConfig = nextJest({ dir: './' });
 /** @type {import('jest').Config} */
 const config = {
     setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-    testEnvironment: 'jest-environment-jsdom',
+    testEnvironment: 'jest-fixed-jsdom',
     transformIgnorePatterns: [
         '/node_modules/(?!react-syntax-highlighter)'
     ],
     moduleNameMapper: {
+        '^@/prisma$': '<rootDir>/src/lib/prisma.ts',
         '^@/(.*)$': '<rootDir>/src/$1',
         'react-syntax-highlighter': '<rootDir>/__mocks__/react-syntax-highlighter.js',
     },

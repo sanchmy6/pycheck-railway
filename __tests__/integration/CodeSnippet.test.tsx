@@ -1,29 +1,56 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { CodeSnippet } from "@/app/courses/components/CodeSnippet";
 jest.mock("@/app/courses/actions", () => require("../../__mocks__/actions.mock"));
 
-describe("CodeSnippet", () => {
-    const sampleCode = `function greet() { return "Hello"; }`;
+import {render, screen, fireEvent, waitFor} from "@testing-library/react";
+import {CodeSnippet} from "@/app/courses/components/CodeSnippet";
+import {getProblemHint} from "@/app/courses/actions";
 
+const sampleCode = `line1\nline2\nline3\nline4`;
+
+describe("CodeSnippet", () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        document.documentElement.setAttribute("data-theme", "dark");
     });
+
 
     it("renders code properly", async () => {
         render(<CodeSnippet code={sampleCode} language="javascript" problemId={1} />);
 
-        expect(await screen.findByText(/function greet\(\)/)).toBeInTheDocument();
-        expect(screen.getByText(/return "Hello"/)).toBeInTheDocument();
+        expect(await screen.findByText(/line1/)).toBeInTheDocument();
+        expect(screen.getByText(/line3/)).toBeInTheDocument();
     });
 
-    it("shows hint after clicking the hint button", async () => {
-        render(<CodeSnippet code={sampleCode} language="javascript" problemId={1} />);
+    it("loads hint from API if not passed via props", async () => {
+        (getProblemHint as jest.Mock).mockResolvedValueOnce({hint: "API hint"});
 
-        const hintButton = await screen.findByRole("button", { name: /show hint/i });
-        fireEvent.click(hintButton);
+        render(
+            <CodeSnippet
+                code={sampleCode}
+                problemId={1}
+                problemData={{correctLinesCount: 2, hint: ""}}
+            />
+        );
 
-        expect(await screen.findByText("Mock hint")).toBeInTheDocument();
+        fireEvent.click(screen.getByRole("button", {name: /show hint/i}));
+        expect(await screen.findByText("API hint")).toBeInTheDocument();
     });
+
+    it("shows and hides hint from props", async () => {
+        render(
+            <CodeSnippet
+                code={sampleCode}
+                problemId={1}
+                problemData={{ correctLinesCount: 2, hint: "Hint here" }}
+            />
+        );
+
+        const btn = screen.getByRole("button", { name: /show hint/i });
+        fireEvent.click(btn);
+        expect(await screen.findByText("Hint here")).toBeInTheDocument();
+        fireEvent.click(btn);
+        expect(screen.queryByText("Hint here")).not.toBeInTheDocument();
+    });
+
 
     it("renders different code when props change", async () => {
         const { rerender } = render(
@@ -43,10 +70,11 @@ describe("CodeSnippet", () => {
         expect(screen.queryByText("const a = 1;")).not.toBeInTheDocument();
     });
 
+
     it("does not allow submission with 0 selected lines", () => {
         render(
             <CodeSnippet
-                code={`line1\nline2\nline3\nline4`}
+                code={sampleCode}
                 problemId={1}
                 language="javascript"
                 problemData={{ correctLinesCount: 2, hint: "" }}
