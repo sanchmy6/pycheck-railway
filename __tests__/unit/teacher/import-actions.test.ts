@@ -187,6 +187,72 @@ describe("importProblems", () => {
         }
     });
 
+    it("handles multiple problems with same category name in same course", async () => {
+        (authLib.verifyAuthToken as jest.Mock).mockReturnValue(true);
+
+        const headers = [
+            "name", "description", "courseName", "lectureName",
+            "codeSnippet", "correctLines", "hint", "reasons"
+        ];
+
+        const csvRows = [
+            headers,
+            [
+                "Valid Problem", "A valid problem for comparison", "Test", "Lecture 1",
+                "def hello():\n    print('Hello World')", "1,2", "Check the syntax",
+                '{"1": "Missing return statement"}'
+            ],
+            [
+                "Test Problem", "T", "Test", "Lecture 1",
+                "def hello():\n    print('Hello World')", "1,2", "Check the syntax",
+                '{"1": "Missing return statement"}'
+            ],
+            [
+                "Test2 Problem", "T", "Test", "Lecture 1",
+                "def hello():\n    print('Hello World')", "1,2", "Check the syntax",
+                '{"1": "Missing return statement"}'
+            ]
+        ];
+
+        global.fetch = jest.fn().mockResolvedValue({
+            ok: true,
+            text: () => Promise.resolve("csv content")
+        });
+
+        (parse as jest.Mock).mockReturnValue(csvRows);
+
+        (mockedDb.queryCourses as jest.Mock).mockResolvedValue([]);
+        (mockedDb.createCourse as jest.Mock).mockResolvedValue({ id: 1, name: "Test" });
+
+        let categoryCallCount = 0;
+        (mockedDb.queryCategoriesByCourseId as jest.Mock).mockImplementation(() => {
+            categoryCallCount++;
+            if (categoryCallCount === 1) {
+                return Promise.resolve([]);
+            } else {
+                return Promise.resolve([{ id: 10, name: "Lecture 1", courseId: 1 }]);
+            }
+        });
+
+        (mockedDb.createCategory as jest.Mock).mockResolvedValue({ id: 10, name: "Lecture 1", courseId: 1 });
+
+        (mockedDb.queryCategoriesWithProblemsForCourse as jest.Mock).mockResolvedValue([
+            { id: 10, problems: [] }
+        ]);
+
+        (mockedDb.createProblem as jest.Mock).mockResolvedValue(undefined);
+
+        const result = await importProblems("token");
+
+        expect(result.success).toBe(true);
+        expect(result.details?.imported).toBe(3); // All 3 problems should be imported
+        expect(result.details?.coursesCreated).toBe(1); // 1 course created
+        expect(result.details?.categoriesCreated).toBe(1); // Only 1 category created (not 3)
+        expect(result.details?.errors).toEqual([]); // No errors
+        expect(mockedDb.createCategory).toHaveBeenCalledTimes(1);
+        expect(mockedDb.createProblem).toHaveBeenCalledTimes(3);
+    });
+
     it("updates existing problem instead of creating", async () => {
         (authLib.verifyAuthToken as jest.Mock).mockReturnValue(true);
 

@@ -34,13 +34,14 @@ model Course {
 
 model Category {
   id         Int       @id @default(autoincrement())
-  name       String    @unique
+  name       String
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
   problems   Problem[]
   courseId   Int
   course     Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
+  @@unique([name, courseId])
   @@index([courseId])
   @@index([name])
 }
