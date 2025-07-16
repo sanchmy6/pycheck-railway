@@ -11,22 +11,22 @@ export async function importProblems(authToken: string) {
   }
 
   const sheetId = process.env.GOOGLE_SHEET_ID;
-  
+
   if (!sheetId) {
     return { success: false, error: "Google Sheet ID not configured" };
   }
 
   try {
     const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
-    
+
     const response = await fetch(csvUrl);
-    
+
     if (!response.ok) {
       return { success: false, error: `Failed to fetch Google Sheet (Status: ${response.status}). Make sure it's publicly accessible.` };
     }
 
     const csvText = await response.text();
-    
+
     let rows: string[][];
     try {
       rows = parse(csvText, {
@@ -38,21 +38,21 @@ export async function importProblems(authToken: string) {
       const err = error as Error;
       return { success: false, error: `Failed to parse CSV: ${err.message}` };
     }
-    
+
     if (rows.length < 2) {
       return { success: false, error: "CSV file appears to be empty or only has headers" };
     }
 
     const headers = rows[0];
-    
+
     const expectedHeaders = ["name", "description", "courseName", "lectureName", "codeSnippet", "correctLines", "hint", "reasons"];
-    
+
     for (const expectedHeader of expectedHeaders) {
       if (!headers.includes(expectedHeader)) {
         return { success: false, error: `Missing required column: ${expectedHeader}` };
       }
     }
-    
+
     let importedCount = 0;
     let updatedCount = 0;
     let skippedCount = 0;
@@ -77,25 +77,25 @@ export async function importProblems(authToken: string) {
           problemData[header] = row[index] || "";
         });
 
-        if (!problemData.name?.trim() || 
-            !problemData.courseName?.trim() || 
-            !problemData.lectureName?.trim() ||
-            !problemData.codeSnippet?.trim() ||
-            !problemData.correctLines?.trim() ||
-            !problemData.hint?.trim() ||
-            !problemData.reasons?.trim()) {
+        if (!problemData.name?.trim() ||
+          !problemData.courseName?.trim() ||
+          !problemData.lectureName?.trim() ||
+          !problemData.codeSnippet?.trim() ||
+          !problemData.correctLines?.trim() ||
+          !problemData.hint?.trim() ||
+          !problemData.reasons?.trim()) {
           errors.push(`Row ${i + 1}: Missing required fields (name, courseName, lectureName, codeSnippet, correctLines, hint, or reasons)`);
           skippedCount++;
           continue;
         }
 
-        let course = await queryCourses().then(courses => 
+        let course = await queryCourses().then(courses =>
           courses.find(c => c.name.toLowerCase() === problemData.courseName.toLowerCase())
         );
-        
+
         if (!course) {
-          const courseResult = await createCourse({ 
-            name: problemData.courseName.trim(), 
+          const courseResult = await createCourse({
+            name: problemData.courseName.trim(),
             description: "",
             status: "Private"
           });
@@ -111,21 +111,23 @@ export async function importProblems(authToken: string) {
           existingCategories.set(course.id, new Set(courseCats.map(c => c.name.toLowerCase())));
         }
 
-        let category = await queryCategoriesByCourseId(course.id).then(categories =>
-          categories.find(c => c.name.toLowerCase() === problemData.lectureName.toLowerCase())
-        );
+        const courseCategories = existingCategories.get(course.id)!;
+        let category;
 
-        if (!category) {
+        if (courseCategories.has(problemData.lectureName.toLowerCase())) {
+          // Category exists, fetch it from database
+          category = await queryCategoriesByCourseId(course.id).then(categories =>
+            categories.find(c => c.name.toLowerCase() === problemData.lectureName.toLowerCase())
+          );
+        } else {
+          // Category doesn't exist, create it
           const categoryResult = await createCategory({
             name: problemData.lectureName.trim(),
             courseId: course.id
           });
           category = categoryResult;
-          const courseCategories = existingCategories.get(course.id)!;
-          if (!courseCategories.has(problemData.lectureName.toLowerCase())) {
-            categoriesCreated++;
-            courseCategories.add(problemData.lectureName.toLowerCase());
-          }
+          categoriesCreated++;
+          courseCategories.add(problemData.lectureName.toLowerCase());
         }
 
         let correctLines: number[] = [];
@@ -150,7 +152,7 @@ export async function importProblems(authToken: string) {
 
         const existingProblems = await queryCategoriesWithProblemsForCourse(course.id);
         const existingCategory = existingProblems.find(cat => cat.id === category.id);
-        const existingProblem = existingCategory?.problems?.find(p => 
+        const existingProblem = existingCategory?.problems?.find(p =>
           p.name.toLowerCase() === problemData.name.trim().toLowerCase()
         );
 
