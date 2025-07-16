@@ -150,6 +150,12 @@ export async function importProblems(authToken: string) {
           }
         }
 
+        if (!category) {
+          errors.push(`Row ${i + 1}: Failed to find or create category`);
+          skippedCount++;
+          continue;
+        }
+
         const existingProblems = await queryCategoriesWithProblemsForCourse(course.id);
         const existingCategory = existingProblems.find(cat => cat.id === category.id);
         const existingProblem = existingCategory?.problems?.find(p =>
