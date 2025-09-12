@@ -11,7 +11,8 @@
     "test": "jest",
     "test-watch": "jest --watchAll",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "ts-node --project prisma/tsconfig-seed.json prisma/seed.ts"
